@@ -1,0 +1,3485 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheets</title>
+<style>
+/* ===== Body & Header ===== */
+body {
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:0;
+  background:#f0f2f5;
+  color:#333;
+}
+header {
+  background:#4CAF50;
+  color:white;
+  padding:6px 12px;
+  display:flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top:0;
+  z-index:10;
+  gap:6px;
+}
+header h2 { margin:0; font-size:1.2rem; }
+
+/* ===== Buttons & Selects ===== */
+button {
+  padding:6px 12px;
+  border:none;
+  border-radius:5px;
+  background:#fff;
+  color:#4CAF50;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover { background:#e6e6e6; }
+select { padding:5px; border-radius:5px; }
+
+/* ===== تنظيم عناصر نافذة الإدارة ===== */
+.modal-content button {
+  margin-top: 10px;
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.modal-content select {
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-content fieldset {
+  margin-bottom: 12px;
+}
+
+/* ===== Table ===== */
+table {
+  border-collapse: collapse;
+  width:100%;
+  margin-top:0px;
+  overflow-x:auto;
+  display:table;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+thead { background:#4CAF50; color:white; position: sticky; top: 0; z-index: 5;}
+th, td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+  min-width:80px;
+}
+tr:nth-child(even) { background:#f9f9f9; }
+tr:hover { background:#e0f7e0; }
+td[contenteditable="true"] { outline:none; }
+.checkbox { transform: scale(1.2); }
+
+/* ===== Modals ===== */
+.modal {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:100;
+}
+.modal-content {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:280px;
+  max-height:90%;
+  overflow:auto;
+}
+.modal-content h3 { margin-top:0; }
+fieldset {
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:5px;
+}
+fieldset legend { font-weight:bold; }
+.modal-content button {
+  width:100%;
+  margin-top:5px;
+  padding:8px 12px;
+  border:none;
+  border-radius:5px;
+  background:#4CAF50;
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+.modal-content button:hover { background:#45a049; }
+
+/* ===== Responsive ===== */
+@media (max-width:600px) {
+  table { font-size:0.85rem; }
+}
+
+.empty-state-btn {
+  display: block;
+  margin: 40px auto;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.empty-state-btn:hover {
+  background: #45a049;
+}
+
+#emptyStateContainer {
+    width: 100%;
+    text-align: center;
+    margin-top: 0px;
+}
+
+/* عمود الترقيم الأول مختلف */
+table th:first-child,
+table td:first-child {
+  width: 20px;
+  max-width: 20px;
+  min-width: 20px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #004503;
+  color: #ffffff;
+}
+
+/* ===== Admin Button ===== */
+.admin-btn {
+  background: #ffffff;
+  color: #2e7d32;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: 0.2s ease;
+}
+
+.admin-btn:hover {
+  background: #e8f5e9;
+  transform: translateY(-1px);
+}
+
+.admin-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.admin-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dark-toggle {
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* لون الصفوف المثبتة */
+tr.pinned {
+    background: #d4edda;
+    font-weight: bold;
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+    background: #121212;
+    color: #e0e0e0;
+}
+body.dark-mode header {
+    background: #1f1f1f;
+    color: #ffffff;
+}
+body.dark-mode table {
+    background: #1e1e1e;
+    color: #e0e0e0;
+}
+body.dark-mode thead {
+    background: #333333;
+    color: #ffffff;
+}
+body.dark-mode tr:nth-child(even) {
+    background: #2a2a2a;
+}
+body.dark-mode tr:hover {
+    background: #3a3a3a;
+}
+body.dark-mode td[contenteditable="true"] {
+    background: #2a2a2a;
+    color: #e0e0e0;
+}
+body.dark-mode .checkbox {
+    accent-color: #4CAF50;
+}
+body.dark-mode .modal-content {
+    background: #1e1e1e;
+    color: #e0e0e0;
+}
+body.dark-mode .modal-content button {
+    background: #4CAF50;
+    color: #ffffff;
+}
+body.dark-mode .modal-content button:hover {
+    background: #45a049;
+}
+body.dark-mode .admin-btn {
+    background: #2a2a2a;
+    color: #4CAF50;
+}
+body.dark-mode .admin-btn:hover {
+    background: #333;
+}
+body.dark-mode .share-btn {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+body.dark-mode .share-btn:hover {
+    background: #3a3a3a;
+}
+body.dark-mode .close-btn {
+    background: #4CAF50;
+    color: #fff;
+}
+body.dark-mode tr.pinned td {
+    background: #2a4d2a;
+    color: #ffffff;
+}
+body.dark-mode tr.pinned td button {
+    background: inherit;
+    color: inherit;
+}
+
+/* ===== Search Input ===== */
+#tableSearch {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* ===== Share Grid ===== */
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.share-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: 0.2s;
+  min-height: 70px;
+}
+
+.share-btn img {
+  width: 28px;
+  height: 28px;
+  filter: none;
+}
+
+.share-btn:hover {
+  background: #f0f0f0;
+}
+
+/* ===== Close Button ===== */
+.close-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 15px;
+  background: #4CAF50;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-btn:hover {
+  background: #45a049;
+}
+
+/* ===== Export Buttons Disabled ===== */
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.export-btn:disabled:hover::after {
+  content: "قريبًا";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+/* ===== Responsive for small screens ===== */
+@media (max-width: 400px) {
+  .share-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+  }
+  
+  .admin-btn {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+}
+
+/* ===== Dropdown Select ===== */
+.dropdown-select {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.dropdown-option {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.dropdown-option:hover {
+  background: #f0f0f0;
+}
+
+/* ===== Input Types Styling ===== */
+input[type="date"] {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+input[type="tel"] {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+}
+
+select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* ===== Dropdown Cell Styling ===== */
+.dropdown-cell {
+  position: relative;
+  cursor: pointer;
+  padding-right: 25px !important; /* مساحة للسهم */
+  text-align: center !important;
+  min-height: 35px;
+}
+
+/* السهم يظهر دائمًا في خلايا القوائم المنسدلة */
+.dropdown-cell::after {
+  content: '▼';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+/* تنسيق النص المختار */
+.dropdown-cell .selected-value {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* عندما تكون الخلية فارغة */
+.dropdown-cell.empty {
+  color: transparent !important;
+}
+
+/* تنسيق في الوضع الداكن */
+body.dark-mode .dropdown-cell::after {
+  color: #4CAF50;
+}
+
+body.dark-mode .dropdown-cell.empty {
+  color: transparent !important;
+}
+
+/* ===== Phone Cell Styling ===== */
+.phone-cell {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.phone-cell[contenteditable="true"] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext;
+}
+
+/* ===== Number Cell Styling ===== */
+.number-cell {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* ===== Date Cell Styling ===== */
+.date-cell input[type="date"] {
+  width: 100%;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.date-cell input[type="date"]:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+body.dark-mode .date-cell input[type="date"] {
+  color: #4CAF50 !important;
+}
+
+body.dark-mode .date-cell input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+/* ===== Sort Button ===== */
+.sort-btn {
+  background: #ffffff;
+  color: #2e7d32;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: 0.2s ease;
+}
+
+.sort-btn:hover {
+  background: #e8f5e9;
+  transform: translateY(-1px);
+}
+
+/* ===== Price Cell Styling ===== */
+.price-cell {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.price-cell[contenteditable="true"] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext;
+}
+
+/* ===== Language Switch Button ===== */
+.language-btn {
+  background: #ffffff;
+  color: #2e7d32;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 10px;
+  border: 2px solid #4CAF50;
+}
+
+.language-btn:hover {
+  background: #e8f5e9;
+}
+
+.language-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+/* ===== Toast Notification ===== */
+#toastContainer {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #4CAF50; }
+.toast.error   { background: #f44336; }
+.toast.info    { background: #2196F3; }
+
+/* ===== Custom Dialog Modal ===== */
+#customDialogInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 14px;
+  margin-top: 6px;
+}
+body.dark-mode #customDialogInput {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+.dialog-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.dialog-buttons button { flex: 1; }
+.dialog-btn-cancel { background: #f44336 !important; color: white !important; }
+.dialog-btn-cancel:hover { background: #d32f2f !important; }
+
+/* ===== Row Color ===== */
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: center;
+}
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: 0.2s;
+}
+.color-swatch:hover, .color-swatch.selected {
+  border-color: #333;
+  transform: scale(1.2);
+}
+body.dark-mode .color-swatch.selected { border-color: #fff; }
+tr.row-colored td { background-color: var(--row-color) !important; }
+body.dark-mode tr.row-colored td { filter: brightness(0.65); }
+tr.row-colored td:first-child { background: #004503 !important; filter: none !important; }
+
+/* ===== Stats Bar ===== */
+#statsBar {
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+body.dark-mode #statsBar {
+  background: #1a1a1a;
+  border-top-color: #333;
+  color: #999;
+}
+#statsBar b { color: #4CAF50; }
+
+/* ===== Undo Button ===== */
+.undo-btn {
+  background: #fff;
+  color: #e65100;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: 0.2s ease;
+}
+.undo-btn:hover { background: #fff3e0; transform: translateY(-1px); }
+.undo-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+body.dark-mode .undo-btn { background: #2a2a2a; color: #ff8a65; }
+body.dark-mode .undo-btn:hover { background: #3a2a1a; }
+
+/* ===== Import hidden input ===== */
+#importFileInput { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- البحث في الشمال -->
+  <input 
+    id="tableSearch"
+    type="text"
+    placeholder="🔍 بحث..."
+    oninput="filterTable()"
+    style="
+      padding:6px 10px;
+      border-radius:20px;
+      border:none;
+      outline:none;
+      min-width:140px;
+    "
+  >
+
+  <!-- زر الفرز -->
+  <button class="sort-btn" onclick="openSortModal()">
+    🔄 فرز
+  </button>
+
+  <!-- زر التراجع -->
+  <button class="undo-btn" id="undoBtn" onclick="undoLastAction()" disabled title="تراجع عن آخر عملية">
+    ↩ تراجع
+  </button>
+
+  <!-- الإدارة في اليمين -->
+  <button class="admin-btn" onclick="openAdminModal()">
+    الإدارة
+  </button>
+</header>
+
+<!-- ===== Admin Modal ===== -->
+<div id="adminModal" class="modal">
+  <div class="modal-content">
+    <h3 id="adminModalTitle">إعدادات البرنامج</h3>
+
+    <!-- تغيير اللغة -->
+    <fieldset>
+      <legend id="languageLegend">اللغة</legend>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="langAr" class="language-btn active" onclick="changeLanguage('ar')">العربية</button>
+        <button id="langEn" class="language-btn" onclick="changeLanguage('en')">English</button>
+        <button id="langFr" class="language-btn" onclick="changeLanguage('fr')">Français</button>
+      </div>
+    </fieldset>
+
+    <!-- Projects -->
+    <fieldset>
+      <legend id="projectsLegend">المشاريع</legend>
+      <button onclick="newProject()" id="newProjectBtn">مشروع جديد</button>
+      <button onclick="renameProject()" id="renameProjectBtn">إعادة تسمية المشروع</button>
+      <button onclick="deleteProject()" id="deleteProjectBtn">حذف المشروع</button>
+      <label for="projectSelectAdmin" id="selectProjectLabel">اختر المشروع:</label>
+      <select id="projectSelectAdmin" onchange="switchProjectAdmin()"></select>
+    </fieldset>
+
+    <!-- Rows & Columns -->
+    <fieldset>
+      <legend id="rowsColumnsLegend">الصفوف والأعمدة</legend>
+      <button onclick="addRow()" id="addRowBtn">إضافة صف</button>
+      <button onclick="addColumn()" id="addColumnBtn">إضافة عمود</button>
+      <button onclick="renameColumn()" id="renameColumnBtn">إعادة تسمية عمود</button>
+      <button onclick="deleteColumn()" id="deleteColumnBtn">حذف عمود</button>
+      <button onclick="editColumnSettings()" id="editColumnBtn">تعديل إعدادات عمود</button>
+    </fieldset>
+
+    <!-- Share & Language -->
+    <fieldset>
+      <legend id="otherLegend">أخرى</legend>
+      <button onclick="exportCSV()" id="exportCSVBtn">نسخ بيانات CSV</button>
+      <button onclick="toggleDarkMode()" id="darkModeBtn">🌙 الوضع الداكن</button>
+      <button onclick="showStorageInfo()" id="storageInfoBtn">📊 معلومات التخزين</button>
+    </fieldset>
+
+    <!-- Export Data -->
+    <fieldset>
+      <legend id="exportLegend">تصدير البيانات</legend>
+      <button onclick="exportCSV()" id="exportCsvBtn2">📄 تصدير CSV (Excel)</button>
+      <button onclick="exportJSON()" id="exportJsonBtn">💾 تصدير JSON (نسخة احتياطية)</button>
+      <button onclick="exportPDF()" id="exportPdfBtn">🖨️ تصدير PDF</button>
+    </fieldset>
+
+    <!-- Import Data -->
+    <fieldset>
+      <legend id="importLegend">استيراد البيانات</legend>
+      <button onclick="document.getElementById('importFileInput').click(); document.getElementById('importFileInput').dataset.type='json';" id="importJsonBtn">📂 استيراد JSON</button>
+      <button onclick="document.getElementById('importFileInput').click(); document.getElementById('importFileInput').dataset.type='csv';" id="importCsvBtn">📊 استيراد CSV</button>
+      <input type="file" id="importFileInput" accept=".json,.csv" onchange="handleImportFile(this)">
+    </fieldset>
+
+    <button onclick="closeAdminModal()" id="closeAdminBtn">إغلاق</button>
+  </div>
+</div>
+
+<!-- ===== Sort Modal ===== -->
+<div id="sortModal" class="modal">
+  <div class="modal-content">
+    <h3 id="sortModalTitle">فرز البيانات</h3>
+    
+    <label for="sortColumnSelect" id="sortColumnLabel">اختر العمود للفرز:</label>
+    <select id="sortColumnSelect" style="width:100%; padding:8px; box-sizing:border-box;"></select>
+    
+    <label for="sortOrder" id="sortOrderLabel">اختر طريقة الفرز:</label>
+    <select id="sortOrder" style="width:100%; padding:8px; box-sizing:border-box;">
+      <option value="asc" id="sortAscOption">تصاعدي (أ إلى ي، صغير إلى كبير)</option>
+      <option value="desc" id="sortDescOption">تنازلي (ي إلى أ، كبير إلى صغير)</option>
+    </select>
+    
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button onclick="applySorting()" style="flex:1; background:#4CAF50; color:white;" id="applySortBtn">تطبيق الفرز</button>
+      <button onclick="closeSortModal()" style="flex:1; background:#f44336; color:white;" id="cancelSortBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Main Table ===== -->
+<div id="emptyStateContainer"></div>
+<div id="tableWrapper" style="overflow-x:auto; width:100%;">
+<table id="table">
+  <thead></thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<!-- ===== Row Settings Modal ===== -->
+<div id="rowSettingsModal" class="modal">
+  <div class="modal-content">
+    <h3 id="rowSettingsTitle">إعدادات الصف</h3>
+    <div id="rowSettingsOptions"></div>
+    <button onclick="closeRowSettingsModal()" class="close-btn" id="closeRowSettingsBtn">إغلاق</button>
+  </div>
+</div>
+
+<!-- ===== Share Modal ===== -->
+<div id="shareModal" class="modal">
+  <div class="modal-content">
+    <h3 style="text-align:center;" id="shareModalTitle">مشاركة البرنامج</h3>
+
+    <div class="share-grid">
+      <!-- نسخ الرابط -->
+      <button onclick="copyAppLink()" class="share-btn" id="copyLinkBtn">
+        🔗 نسخ الرابط
+      </button>
+
+      <!-- واتساب -->
+      <button onclick="shareWhatsApp()" class="share-btn" id="whatsappBtn">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg">
+        واتساب
+      </button>
+
+      <!-- فيسبوك -->
+      <button onclick="shareFacebook()" class="share-btn" id="facebookBtn">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/facebook.svg">
+        فيسبوك
+      </button>
+
+      <!-- لينكدإن -->
+      <button onclick="shareLinkedIn()" class="share-btn" id="linkedinBtn">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg">
+        لينكدإن
+      </button>
+    </div>
+
+    <!-- زر الإغلاق -->
+    <button onclick="closeShareModal()" class="close-btn" id="closeShareBtn">
+      إغلاق
+    </button>
+  </div>
+</div>
+
+<!-- ===== Add Column Modal ===== -->
+<div id="addColumnModal" class="modal">
+  <div class="modal-content">
+    <h3 id="addColumnTitle">إضافة عمود جديد</h3>
+    
+    <label for="newColumnName" id="columnNameLabel">اسم العمود:</label>
+    <input type="text" id="newColumnName" placeholder="مثال: اسم العميل" style="width:100%; padding:8px; box-sizing:border-box;">
+    
+    <label for="columnType" id="columnTypeLabel">نوع العمود:</label>
+    <select id="columnType" style="width:100%; padding:8px; box-sizing:border-box;" onchange="toggleColumnOptions()">
+      <option value="text" id="typeTextOption">نص عادي</option>
+      <option value="phone" id="typePhoneOption">رقم هاتف</option>
+      <option value="date" id="typeDateOption">تاريخ</option>
+      <option value="dropdown" id="typeDropdownOption">قائمة منسدلة</option>
+      <option value="number" id="typeNumberOption">رقم</option>
+      <option value="price" id="typePriceOption">سعر</option>
+    </select>
+    
+    <div id="dropdownOptionsContainer" style="display:none;">
+      <label for="dropdownOptions" id="dropdownOptionsLabel">خيارات القائمة (سطر لكل خيار):</label>
+      <textarea id="dropdownOptions" rows="4" placeholder="خيار 1&#10;خيار 2&#10;خيار 3" style="width:100%; padding:8px; box-sizing:border-box;"></textarea>
+    </div>
+    
+    <div id="priceOptionsContainer" style="display:none;">
+      <label for="priceCurrency" id="priceCurrencyLabel">اختر العملة:</label>
+      <select id="priceCurrency" style="width:100%; padding:8px; box-sizing:border-box;">
+        <option value="USD">دولار أمريكي ($)</option>
+        <option value="EUR">يورو (€)</option>
+        <option value="GBP">جنيه إسترليني (£)</option>
+        <option value="JPY">ين ياباني (¥)</option>
+        <option value="SAR">ريال سعودي (ر.س)</option>
+        <option value="AED">درهم إماراتي (د.إ)</option>
+        <option value="EGP">جنيه مصري (ج.م)</option>
+        <option value="QAR">ريال قطري (ر.ق)</option>
+        <option value="KWD">دينار كويتي (د.ك)</option>
+        <option value="BHD">دينار بحريني (ب.د)</option>
+        <option value="OMR">ريال عماني (ر.ع)</option>
+        <option value="JOD">دينار أردني (د.أ)</option>
+        <option value="LBP">ليرة لبنانية (ل.ل)</option>
+        <option value="TRY">ليرة تركية (₺)</option>
+        <option value="CNY">يوان صيني (¥)</option>
+        <option value="INR">روبية هندية (₹)</option>
+        <option value="RUB">روبل روسي (₽)</option>
+      </select>
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button onclick="saveNewColumn()" style="flex:1; background:#4CAF50; color:white;" id="addColumnBtnModal">إضافة</button>
+      <button onclick="closeAddColumnModal()" style="flex:1; background:#f44336; color:white;" id="cancelAddColumnBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Edit Column Settings Modal ===== -->
+<div id="editColumnModal" class="modal">
+  <div class="modal-content">
+    <h3 id="editColumnTitle">تعديل إعدادات العمود</h3>
+    
+    <label for="editColumnSelect" id="editColumnSelectLabel">اختر العمود:</label>
+    <select id="editColumnSelect" style="width:100%; padding:8px; box-sizing:border-box;" onchange="loadColumnSettings()"></select>
+    
+    <div id="columnSettingsContainer">
+      <!-- سيتم ملؤها ديناميكياً -->
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button onclick="saveColumnSettings()" style="flex:1; background:#4CAF50; color:white;" id="saveColumnBtn">حفظ التغييرات</button>
+      <button onclick="closeEditColumnModal()" style="flex:1; background:#f44336; color:white;" id="cancelEditColumnBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Dropdown Select (Floating) ===== -->
+<div id="dropdownSelect" class="dropdown-select"></div>
+
+<!-- ===== Stats Bar ===== -->
+<div id="statsBar" style="display:none;">
+  صفوف: <b id="statRows">0</b>
+  | منجز: <b id="statDone">0</b>
+  | مثبت: <b id="statPinned">0</b>
+  | مجموع الأرقام: <b id="statSum">—</b>
+</div>
+
+<!-- ===== Toast Container ===== -->
+<div id="toastContainer"></div>
+
+<!-- ===== Custom Dialog Modal ===== -->
+<div id="customDialogModal" class="modal">
+  <div class="modal-content" style="max-width:360px; width:90%;">
+    <h3 id="customDialogTitle">تأكيد</h3>
+    <p id="customDialogMessage" style="margin:0 0 4px;"></p>
+    <input type="text" id="customDialogInput" style="display:none;" placeholder="">
+    <div class="dialog-buttons">
+      <button id="customDialogConfirm" style="background:#4CAF50; color:white;">تأكيد</button>
+      <button class="dialog-btn-cancel" onclick="closeCustomDialog(false)">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Row Color Modal ===== -->
+<div id="rowColorModal" class="modal">
+  <div class="modal-content" style="max-width:320px; width:90%;">
+    <h3>🎨 لون الصف</h3>
+    <div class="color-swatches" id="colorSwatches"></div>
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button onclick="applyRowColor()" style="flex:1; background:#4CAF50; color:white;">تطبيق</button>
+      <button onclick="removeRowColor()" style="flex:1; background:#9e9e9e; color:white;">إزالة اللون</button>
+      <button onclick="closeRowColorModal()" style="flex:1; background:#f44336; color:white;">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// ====================== Utility Functions ======================
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function generateRowId() {
+  return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function cleanText(value) {
+  if (typeof value !== 'string') return value;
+  return value
+    .replace(/\u00A0/g, ' ')  // استبدال non-breaking space بمسافة عادية
+    .replace(/&nbsp;/g, ' ')  // استبدال &nbsp; بمسافة عادية
+    .replace(/&amp;nbsp;/g, ' ')  // استبدال &amp;nbsp; بمسافة عادية
+    .replace(/&amp;/g, '&')  // استبدال &amp; بـ &
+    .trim();
+}
+
+// ====================== Multi-language Support ======================
+const texts = { 
+  ar: {
+    // Header
+    searchPlaceholder: "🔍 بحث...",
+    sortButton: "🔄 فرز",
+    adminButton: "الإدارة",
+    
+    // Admin Modal
+    adminModalTitle: "إعدادات البرنامج",
+    languageLegend: "اللغة",
+    arabicButton: "العربية",
+    englishButton: "English",
+    frenchButton: "Français",
+    projectsLegend: "المشاريع",
+    newProjectBtn: "مشروع جديد",
+    renameProjectBtn: "إعادة تسمية المشروع",
+    deleteProjectBtn: "حذف المشروع",
+    selectProjectLabel: "اختر المشروع:",
+    rowsColumnsLegend: "الصفوف والأعمدة",
+    addRowBtn: "إضافة صف",
+    addColumnBtn: "إضافة عمود",
+    renameColumnBtn: "إعادة تسمية عمود",
+    deleteColumnBtn: "حذف عمود",
+    editColumnBtn: "تعديل إعدادات عمود",
+    otherLegend: "أخرى",
+    exportCSVBtn: "نسخ بيانات CSV",
+    darkModeBtn: "🌙 الوضع الداكن",
+    storageInfoBtn: "📊 معلومات التخزين",
+    exportLegend: "تصدير البيانات",
+    exportJsonBtn: "تصدير JSON",
+    exportTxtBtn: "تصدير TXT",
+    exportPdfBtn: "تصدير PDF",
+    exportXlsxBtn: "تصدير XLSX",
+    closeAdminBtn: "إغلاق",
+    
+    // Sort Modal
+    sortModalTitle: "فرز البيانات",
+    sortColumnLabel: "اختر العمود للفرز:",
+    sortOrderLabel: "اختر طريقة الفرز:",
+    sortAscOption: "تصاعدي (أ إلى ي، صغير إلى كبير)",
+    sortDescOption: "تنازلي (ي إلى أ، كبير إلى صغير)",
+    applySortBtn: "تطبيق الفرز",
+    cancelSortBtn: "إلغاء",
+    
+    // Row Settings
+    rowSettingsTitle: "إعدادات الصف",
+    closeRowSettingsBtn: "إغلاق",
+    
+    // Share Modal
+    shareModalTitle: "مشاركة البرنامج",
+    copyLinkBtn: "🔗 نسخ الرابط",
+    whatsappBtn: "واتساب",
+    facebookBtn: "فيسبوك",
+    linkedinBtn: "لينكدإن",
+    closeShareBtn: "إغلاق",
+    
+    // Add Column Modal
+    addColumnTitle: "إضافة عمود جديد",
+    columnNameLabel: "اسم العمود:",
+    columnTypeLabel: "نوع العمود:",
+    typeTextOption: "نص عادي",
+    typePhoneOption: "رقم هاتف",
+    typeDateOption: "تاريخ",
+    typeDropdownOption: "قائمة منسدلة",
+    typeNumberOption: "رقم",
+    typePriceOption: "سعر",
+    dropdownOptionsLabel: "خيارات القائمة (سطر لكل خيار):",
+    priceCurrencyLabel: "اختر العملة:",
+    addColumnBtnModal: "إضافة",
+    cancelAddColumnBtn: "إلغاء",
+    
+    // Edit Column Modal
+    editColumnTitle: "تعديل إعدادات العمود",
+    editColumnSelectLabel: "اختر العمود:",
+    saveColumnBtn: "حفظ التغييرات",
+    cancelEditColumnBtn: "إلغاء",
+    
+    // Prompts & Alerts
+    promptNewProject: "اسم المشروع الجديد:",
+    promptRenameProject: "اسم المشروع الجديد:",
+    promptSelectColumn: "اختار رقم العمود:\n",
+    promptRenameColumn: "الاسم الجديد:",
+    confirmDeleteColumn: "حذف عمود",
+    confirmDeleteRow: "حذف هذا الصف؟",
+    alertSystemColumn: "هذا عمود أساسي ولا يمكن حذفه",
+    shareCopied: "تم نسخ الرابط للنسخ والمشاركة",
+    emptyStateBtn: "➕ أنشئ مشروعًا جديدًا",
+    settingsHeader: "الإعدادات",
+    importLegend: "استيراد البيانات",
+    importJsonBtn: "📂 استيراد JSON",
+    importCsvBtn: "📊 استيراد CSV",
+    
+    // Currency Names
+    USD: "دولار أمريكي",
+    EUR: "يورو",
+    GBP: "جنيه إسترليني",
+    JPY: "ين ياباني",
+    SAR: "ريال سعودي",
+    AED: "درهم إماراتي",
+    EGP: "جنيه مصري",
+    QAR: "ريال قطري",
+    KWD: "دينار كويتي",
+    BHD: "دينار بحريني",
+    OMR: "ريال عماني",
+    JOD: "دينار أردني",
+    LBP: "ليرة لبنانية",
+    TRY: "ليرة تركية",
+    CNY: "يوان صيني",
+    INR: "روبية هندية",
+    RUB: "روبل روسي"
+  },
+  
+  en: {
+    // Header
+    searchPlaceholder: "🔍 Search...",
+    sortButton: "🔄 Sort",
+    adminButton: "Admin",
+    
+    // Admin Modal
+    adminModalTitle: "Program Settings",
+    languageLegend: "Language",
+    arabicButton: "العربية",
+    englishButton: "English",
+    frenchButton: "Français",
+    projectsLegend: "Projects",
+    newProjectBtn: "New Project",
+    renameProjectBtn: "Rename Project",
+    deleteProjectBtn: "Delete Project",
+    selectProjectLabel: "Select Project:",
+    rowsColumnsLegend: "Rows & Columns",
+    addRowBtn: "Add Row",
+    addColumnBtn: "Add Column",
+    renameColumnBtn: "Rename Column",
+    deleteColumnBtn: "Delete Column",
+    editColumnBtn: "Edit Column Settings",
+    otherLegend: "Other",
+    exportCSVBtn: "Copy CSV Data",
+    darkModeBtn: "🌙 Dark Mode",
+    storageInfoBtn: "📊 Storage Info",
+    exportLegend: "Export Data",
+    exportJsonBtn: "Export JSON",
+    exportTxtBtn: "Export TXT",
+    exportPdfBtn: "Export PDF",
+    exportXlsxBtn: "Export XLSX",
+    closeAdminBtn: "Close",
+    
+    // Sort Modal
+    sortModalTitle: "Sort Data",
+    sortColumnLabel: "Select column to sort:",
+    sortOrderLabel: "Select sort order:",
+    sortAscOption: "Ascending (A-Z, Small to Large)",
+    sortDescOption: "Descending (Z-A, Large to Small)",
+    applySortBtn: "Apply Sort",
+    cancelSortBtn: "Cancel",
+    
+    // Row Settings
+    rowSettingsTitle: "Row Settings",
+    closeRowSettingsBtn: "Close",
+    
+    // Share Modal
+    shareModalTitle: "Share Program",
+    copyLinkBtn: "🔗 Copy Link",
+    whatsappBtn: "WhatsApp",
+    facebookBtn: "Facebook",
+    linkedinBtn: "LinkedIn",
+    closeShareBtn: "Close",
+    
+    // Add Column Modal
+    addColumnTitle: "Add New Column",
+    columnNameLabel: "Column Name:",
+    columnTypeLabel: "Column Type:",
+    typeTextOption: "Plain Text",
+    typePhoneOption: "Phone Number",
+    typeDateOption: "Date",
+    typeDropdownOption: "Dropdown List",
+    typeNumberOption: "Number",
+    typePriceOption: "Price",
+    dropdownOptionsLabel: "Dropdown options (one per line):",
+    priceCurrencyLabel: "Select Currency:",
+    addColumnBtnModal: "Add",
+    cancelAddColumnBtn: "Cancel",
+    
+    // Edit Column Modal
+    editColumnTitle: "Edit Column Settings",
+    editColumnSelectLabel: "Select Column:",
+    saveColumnBtn: "Save Changes",
+    cancelEditColumnBtn: "Cancel",
+    
+    // Prompts & Alerts
+    promptNewProject: "New project name:",
+    promptRenameProject: "New project name:",
+    promptSelectColumn: "Select column number:\n",
+    promptRenameColumn: "New name:",
+    confirmDeleteColumn: "Delete column",
+    confirmDeleteRow: "Delete this row?",
+    alertSystemColumn: "This is a system column and cannot be deleted",
+    shareCopied: "Link copied for sharing",
+    emptyStateBtn: "➕ Create a New Project",
+    settingsHeader: "Settings",
+    importLegend: "Import Data",
+    importJsonBtn: "📂 Import JSON",
+    importCsvBtn: "📊 Import CSV",
+    
+    // Currency Names
+    USD: "US Dollar",
+    EUR: "Euro",
+    GBP: "British Pound",
+    JPY: "Japanese Yen",
+    SAR: "Saudi Riyal",
+    AED: "UAE Dirham",
+    EGP: "Egyptian Pound",
+    QAR: "Qatari Riyal",
+    KWD: "Kuwaiti Dinar",
+    BHD: "Bahraini Dinar",
+    OMR: "Omani Rial",
+    JOD: "Jordanian Dinar",
+    LBP: "Lebanese Pound",
+    TRY: "Turkish Lira",
+    CNY: "Chinese Yuan",
+    INR: "Indian Rupee",
+    RUB: "Russian Ruble"
+  },
+  
+  fr: {
+    // Header
+    searchPlaceholder: "🔍 Rechercher...",
+    sortButton: "🔄 Trier",
+    adminButton: "Administration",
+    
+    // Admin Modal
+    adminModalTitle: "Paramètres du Programme",
+    languageLegend: "Langue",
+    arabicButton: "العربية",
+    englishButton: "English",
+    frenchButton: "Français",
+    projectsLegend: "Projets",
+    newProjectBtn: "Nouveau Projet",
+    renameProjectBtn: "Renommer le Projet",
+    deleteProjectBtn: "Supprimer le Projet",
+    selectProjectLabel: "Choisir le Projet:",
+    rowsColumnsLegend: "Lignes & Colonnes",
+    addRowBtn: "Ajouter une Ligne",
+    addColumnBtn: "Ajouter une Colonne",
+    renameColumnBtn: "Renommer la Colonne",
+    deleteColumnBtn: "Supprimer la Colonne",
+    editColumnBtn: "Modifier les Paramètres",
+    otherLegend: "Autre",
+    exportCSVBtn: "Copier les Données CSV",
+    darkModeBtn: "🌙 Mode Sombre",
+    storageInfoBtn: "📊 Infos Stockage",
+    exportLegend: "Exporter les Données",
+    exportJsonBtn: "Exporter JSON",
+    exportTxtBtn: "Exporter TXT",
+    exportPdfBtn: "Exporter PDF",
+    exportXlsxBtn: "Exporter XLSX",
+    closeAdminBtn: "Fermer",
+    
+    // Sort Modal
+    sortModalTitle: "Trier les Données",
+    sortColumnLabel: "Choisir la colonne à trier:",
+    sortOrderLabel: "Choisir l'ordre de tri:",
+    sortAscOption: "Croissant (A-Z, Petit au Grand)",
+    sortDescOption: "Décroissant (Z-A, Grand au Petit)",
+    applySortBtn: "Appliquer le Tri",
+    cancelSortBtn: "Annuler",
+    
+    // Row Settings
+    rowSettingsTitle: "Paramètres de la Ligne",
+    closeRowSettingsBtn: "Fermer",
+    
+    // Share Modal
+    shareModalTitle: "Partager le Programme",
+    copyLinkBtn: "🔗 Copier le Lien",
+    whatsappBtn: "WhatsApp",
+    facebookBtn: "Facebook",
+    linkedinBtn: "LinkedIn",
+    closeShareBtn: "Fermer",
+    
+    // Add Column Modal
+    addColumnTitle: "Ajouter une Nouvelle Colonne",
+    columnNameLabel: "Nom de la Colonne:",
+    columnTypeLabel: "Type de Colonne:",
+    typeTextOption: "Texte Simple",
+    typePhoneOption: "Numéro de Téléphone",
+    typeDateOption: "Date",
+    typeDropdownOption: "Liste Déroulante",
+    typeNumberOption: "Nombre",
+    typePriceOption: "Prix",
+    dropdownOptionsLabel: "Options (une par ligne):",
+    priceCurrencyLabel: "Choisir la Devise:",
+    addColumnBtnModal: "Ajouter",
+    cancelAddColumnBtn: "Annuler",
+    
+    // Edit Column Modal
+    editColumnTitle: "Modifier les Paramètres",
+    editColumnSelectLabel: "Choisir la Colonne:",
+    saveColumnBtn: "Enregistrer",
+    cancelEditColumnBtn: "Annuler",
+    
+    // Prompts & Alerts
+    promptNewProject: "Nom du nouveau projet:",
+    promptRenameProject: "Nouveau nom du projet:",
+    promptSelectColumn: "Choisir le numéro de colonne:\n",
+    promptRenameColumn: "Nouveau nom:",
+    confirmDeleteColumn: "Supprimer la colonne",
+    confirmDeleteRow: "Supprimer cette ligne?",
+    alertSystemColumn: "C'est une colonne système et ne peut pas être supprimée",
+    shareCopied: "Lien copié pour partage",
+    emptyStateBtn: "➕ Créer un Nouveau Projet",
+    settingsHeader: "Paramètres",
+    importLegend: "Importer des Données",
+    importJsonBtn: "📂 Importer JSON",
+    importCsvBtn: "📊 Importer CSV",
+    
+    // Currency Names
+    USD: "Dollar américain",
+    EUR: "Euro",
+    GBP: "Livre sterling",
+    JPY: "Yen japonais",
+    SAR: "Riyal saoudien",
+    AED: "Dirham émirati",
+    EGP: "Livre égyptienne",
+    QAR: "Riyal qatari",
+    KWD: "Dinar koweïtien",
+    BHD: "Dinar bahreïni",
+    OMR: "Rial omanais",
+    JOD: "Dinar jordanien",
+    LBP: "Livre libanaise",
+    TRY: "Lire turque",
+    CNY: "Yuan chinois",
+    INR: "Roupie indienne",
+    RUB: "Rouble russe"
+  }
+};
+
+let currentLang = 'ar';
+
+// Currency symbols mapping
+const currencySymbols = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  SAR: 'ر.س',
+  AED: 'د.إ',
+  EGP: 'ج.م',
+  QAR: 'ر.ق',
+  KWD: 'د.ك',
+  BHD: 'ب.د',
+  OMR: 'ر.ع',
+  JOD: 'د.أ',
+  LBP: 'ل.ل',
+  TRY: '₺',
+  CNY: '¥',
+  INR: '₹',
+  RUB: '₽'
+};
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  
+  // Update header elements
+  document.getElementById('tableSearch').placeholder = texts[lang].searchPlaceholder;
+  document.querySelector('.sort-btn').textContent = texts[lang].sortButton;
+  document.querySelector('.admin-btn').textContent = texts[lang].adminButton;
+  
+  // Update admin modal
+  document.getElementById('adminModalTitle').innerHTML = texts[lang].adminModalTitle;
+  document.getElementById('languageLegend').innerHTML = texts[lang].languageLegend;
+  document.getElementById('projectsLegend').innerHTML = texts[lang].projectsLegend;
+  document.getElementById('newProjectBtn').innerHTML = texts[lang].newProjectBtn;
+  document.getElementById('renameProjectBtn').innerHTML = texts[lang].renameProjectBtn;
+  document.getElementById('deleteProjectBtn').innerHTML = texts[lang].deleteProjectBtn;
+  document.getElementById('selectProjectLabel').innerHTML = texts[lang].selectProjectLabel;
+  document.getElementById('rowsColumnsLegend').innerHTML = texts[lang].rowsColumnsLegend;
+  document.getElementById('addRowBtn').innerHTML = texts[lang].addRowBtn;
+  document.getElementById('addColumnBtn').innerHTML = texts[lang].addColumnBtn;
+  document.getElementById('renameColumnBtn').innerHTML = texts[lang].renameColumnBtn;
+  document.getElementById('deleteColumnBtn').innerHTML = texts[lang].deleteColumnBtn;
+  document.getElementById('editColumnBtn').innerHTML = texts[lang].editColumnBtn;
+  document.getElementById('otherLegend').innerHTML = texts[lang].otherLegend;
+  document.getElementById('exportCSVBtn').innerHTML = texts[lang].exportCSVBtn;
+  document.getElementById('darkModeBtn').innerHTML = texts[lang].darkModeBtn;
+  document.getElementById('storageInfoBtn').innerHTML = texts[lang].storageInfoBtn;
+  document.getElementById('exportLegend').innerHTML = texts[lang].exportLegend;
+  document.getElementById('exportJsonBtn').innerHTML = texts[lang].exportJsonBtn;
+  document.getElementById('exportPdfBtn').innerHTML = texts[lang].exportPdfBtn;
+  document.getElementById('closeAdminBtn').innerHTML = texts[lang].closeAdminBtn;
+  
+  // Update sort modal
+  document.getElementById('sortModalTitle').innerHTML = texts[lang].sortModalTitle;
+  document.getElementById('sortColumnLabel').innerHTML = texts[lang].sortColumnLabel;
+  document.getElementById('sortOrderLabel').innerHTML = texts[lang].sortOrderLabel;
+  document.getElementById('sortAscOption').innerHTML = texts[lang].sortAscOption;
+  document.getElementById('sortDescOption').innerHTML = texts[lang].sortDescOption;
+  document.getElementById('applySortBtn').innerHTML = texts[lang].applySortBtn;
+  document.getElementById('cancelSortBtn').innerHTML = texts[lang].cancelSortBtn;
+  
+  // Update row settings modal
+  document.getElementById('rowSettingsTitle').innerHTML = texts[lang].rowSettingsTitle;
+  document.getElementById('closeRowSettingsBtn').innerHTML = texts[lang].closeRowSettingsBtn;
+  
+  // Update share modal
+  document.getElementById('shareModalTitle').innerHTML = texts[lang].shareModalTitle;
+  document.getElementById('copyLinkBtn').innerHTML = texts[lang].copyLinkBtn;
+  document.getElementById('whatsappBtn').innerHTML = texts[lang].whatsappBtn;
+  document.getElementById('facebookBtn').innerHTML = texts[lang].facebookBtn;
+  document.getElementById('linkedinBtn').innerHTML = texts[lang].linkedinBtn;
+  document.getElementById('closeShareBtn').innerHTML = texts[lang].closeShareBtn;
+  
+  // Update add column modal
+  document.getElementById('addColumnTitle').innerHTML = texts[lang].addColumnTitle;
+  document.getElementById('columnNameLabel').innerHTML = texts[lang].columnNameLabel;
+  document.getElementById('columnTypeLabel').innerHTML = texts[lang].columnTypeLabel;
+  document.getElementById('typeTextOption').innerHTML = texts[lang].typeTextOption;
+  document.getElementById('typePhoneOption').innerHTML = texts[lang].typePhoneOption;
+  document.getElementById('typeDateOption').innerHTML = texts[lang].typeDateOption;
+  document.getElementById('typeDropdownOption').innerHTML = texts[lang].typeDropdownOption;
+  document.getElementById('typeNumberOption').innerHTML = texts[lang].typeNumberOption;
+  document.getElementById('typePriceOption').innerHTML = texts[lang].typePriceOption;
+  document.getElementById('dropdownOptionsLabel').innerHTML = texts[lang].dropdownOptionsLabel;
+  document.getElementById('priceCurrencyLabel').innerHTML = texts[lang].priceCurrencyLabel;
+  document.getElementById('addColumnBtnModal').innerHTML = texts[lang].addColumnBtnModal;
+  document.getElementById('cancelAddColumnBtn').innerHTML = texts[lang].cancelAddColumnBtn;
+  
+  // Update edit column modal
+  document.getElementById('editColumnTitle').innerHTML = texts[lang].editColumnTitle;
+  document.getElementById('editColumnSelectLabel').innerHTML = texts[lang].editColumnSelectLabel;
+  document.getElementById('saveColumnBtn').innerHTML = texts[lang].saveColumnBtn;
+  document.getElementById('cancelEditColumnBtn').innerHTML = texts[lang].cancelEditColumnBtn;
+
+  // Update import/export legend
+  const importLegendEl = document.getElementById('importLegend');
+  if (importLegendEl) importLegendEl.innerHTML = texts[lang].importLegend || 'استيراد البيانات';
+  const importJsonEl = document.getElementById('importJsonBtn');
+  if (importJsonEl) importJsonEl.innerHTML = texts[lang].importJsonBtn || '📂 استيراد JSON';
+  const importCsvEl = document.getElementById('importCsvBtn');
+  if (importCsvEl) importCsvEl.innerHTML = texts[lang].importCsvBtn || '📊 استيراد CSV';
+
+  // Update document direction
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  
+  // Update active language buttons
+  document.querySelectorAll('.language-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
+  
+  // Refresh table to update header
+  if (currentProject) renderTable();
+  
+  // Save language preference
+  localStorage.setItem('appLanguage', lang);
+}
+
+function changeLanguage(lang) {
+  applyLanguage(lang);
+}
+
+const defaultColumns = {
+  ar: [
+    {key:"name",     label:"الاسم",        type:"text",     system:false},
+    {key:"phone",    label:"الهاتف",       type:"phone",    system:false},
+    {key:"whatsapp", label:"واتساب",       type:"phone",    system:false},
+    {key:"address",  label:"العنوان",      type:"text",     system:false},
+    {key:"order",    label:"الطلبية",      type:"text",     system:false},
+    {key:"done",     label:"تم التسليم",   type:"checkbox", system:true}
+  ],
+  en: [
+    {key:"name",     label:"Name",         type:"text",     system:false},
+    {key:"phone",    label:"Phone",        type:"phone",    system:false},
+    {key:"whatsapp", label:"WhatsApp",     type:"phone",    system:false},
+    {key:"address",  label:"Address",      type:"text",     system:false},
+    {key:"order",    label:"Order",        type:"text",     system:false},
+    {key:"done",     label:"Delivered",    type:"checkbox", system:true}
+  ],
+  fr: [
+    {key:"name",     label:"Nom",          type:"text",     system:false},
+    {key:"phone",    label:"Téléphone",    type:"phone",    system:false},
+    {key:"whatsapp", label:"WhatsApp",     type:"phone",    system:false},
+    {key:"address",  label:"Adresse",      type:"text",     system:false},
+    {key:"order",    label:"Commande",     type:"text",     system:false},
+    {key:"done",     label:"Livré",        type:"checkbox", system:true}
+  ]
+};
+
+function getDefaultColumns() {
+  return JSON.parse(JSON.stringify(defaultColumns[currentLang] || defaultColumns.ar));
+}
+class IndexedDBManager {
+  constructor() {
+    this.dbName = 'SheetsDB';
+    this.dbVersion = 2;
+    this.storeName = 'sheets_data';
+    this.db = null;
+    this.useIndexedDB = false;
+    this.initialized = false;
+  }
+
+  async init() {
+    if (this.initialized) return;
+    if (this._initPromise) return this._initPromise;
+
+    this._initPromise = new Promise((resolve) => {
+      try {
+        if (!window.indexedDB) {
+          console.warn('⚠️ IndexedDB غير مدعوم في هذا المتصفح');
+          this.useIndexedDB = false;
+          this.initialized = true;
+          return resolve();
+        }
+
+        const request = indexedDB.open(this.dbName, this.dbVersion);
+
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(this.storeName)) {
+            db.createObjectStore(this.storeName);
+          }
+        };
+
+        request.onsuccess = (e) => {
+          this.db = e.target.result;
+          this.useIndexedDB = true;
+          this.initialized = true;
+          console.log('✅ IndexedDB متصل بنجاح');
+          resolve();
+        };
+
+        request.onerror = (e) => {
+          console.error('❌ خطأ في IndexedDB:', e.target.error);
+          this.useIndexedDB = false;
+          this.initialized = true;
+          resolve();
+        };
+
+        request.onblocked = () => {
+          console.warn('⚠️ IndexedDB محظور، استخدام localStorage');
+          this.useIndexedDB = false;
+          this.initialized = true;
+          resolve();
+        };
+      } catch (error) {
+        console.error('❌ فشل تهيئة IndexedDB:', error);
+        this.useIndexedDB = false;
+        this.initialized = true;
+        resolve();
+      }
+    });
+
+    return this._initPromise;
+  }
+
+  async saveData(key, data) {
+    await this.init();
+    
+    if (this.useIndexedDB && this.db) {
+      return new Promise((resolve) => {
+        try {
+          const transaction = this.db.transaction(this.storeName, 'readwrite');
+          const store = transaction.objectStore(this.storeName);
+          const request = store.put(data, key);
+          
+          request.onsuccess = () => {
+            console.log('💾 تم الحفظ في IndexedDB');
+            resolve(true);
+          };
+          
+          request.onerror = (e) => {
+            console.warn('⚠️ فشل الحفظ في IndexedDB:', e.target.error);
+            resolve(false);
+          };
+        } catch (error) {
+          console.warn('⚠️ استثناء في الحفظ إلى IndexedDB:', error);
+          resolve(false);
+        }
+      });
+    }
+    return false;
+  }
+
+  async loadData(key) {
+    await this.init();
+    
+    if (this.useIndexedDB && this.db) {
+      return new Promise((resolve) => {
+        try {
+          const transaction = this.db.transaction(this.storeName, 'readonly');
+          const store = transaction.objectStore(this.storeName);
+          const request = store.get(key);
+          
+          request.onsuccess = (e) => {
+            const result = e.target.result;
+            if (result) {
+              console.log('📂 تم التحميل من IndexedDB');
+            }
+            resolve(result || null);
+          };
+          
+          request.onerror = (e) => {
+            console.warn('⚠️ فشل التحميل من IndexedDB:', e.target.error);
+            resolve(null);
+          };
+        } catch (error) {
+          console.warn('⚠️ استثناء في التحميل من IndexedDB:', error);
+          resolve(null);
+        }
+      });
+    }
+    return null;
+  }
+
+  async deleteData(key) {
+    await this.init();
+    
+    if (this.useIndexedDB && this.db) {
+      return new Promise((resolve) => {
+        try {
+          const transaction = this.db.transaction(this.storeName, 'readwrite');
+          const store = transaction.objectStore(this.storeName);
+          const request = store.delete(key);
+          
+          request.onsuccess = () => {
+            console.log('🗑️ تم الحذف من IndexedDB');
+            resolve(true);
+          };
+          
+          request.onerror = (e) => {
+            console.warn('⚠️ فشل الحذف من IndexedDB:', e.target.error);
+            resolve(false);
+          };
+        } catch (error) {
+          console.warn('⚠️ استثناء في الحذف من IndexedDB:', error);
+          resolve(false);
+        }
+      });
+    }
+    return false;
+  }
+}
+
+// ====================== Global Variables ======================
+const dbManager = new IndexedDBManager();
+let projects = {};
+let currentProject = null;
+let darkMode = false;
+let activeDatePickerCell = null;
+let activeDropdownCell = null;
+let columnDescriptors = {}; // واصفات الأعمدة المحسنة
+
+// ====================== Column System Optimization ======================
+function buildColumnDescriptors(projectName) {
+  if (!projects[projectName]) return;
+  const project = projects[projectName];
+  
+  columnDescriptors[projectName] = {};
+  
+  // بناء واصفات جاهزة لكل عمود مرة واحدة
+  project.columns.forEach(col => {
+    columnDescriptors[projectName][col.key] = {
+      key: col.key,
+      label: col.label,
+      type: col.type || 'text',
+      system: col.system || false,
+      options: col.options || [],
+      currency: col.currency || 'USD',
+      renderer: getColumnRenderer(col.type || 'text', col.options || [], col.currency || 'USD')
+    };
+  });
+}
+
+function getColumnRenderer(type, options, currency) {
+  // إرجاع دالة التصيير المناسبة لكل نوع عمود - تُحسب مرة واحدة فقط
+  switch(type) {
+    case 'checkbox':
+      return (td, value, colKey) => {
+        const cb = document.createElement("input"); 
+        cb.type="checkbox"; 
+        cb.checked = value; 
+        cb.className = "checkbox"; 
+        cb.onchange = debouncedSaveTable; 
+        td.appendChild(cb);
+      };
+      
+    case 'date':
+      return (td, value, colKey) => {
+        // استخدام input تاريخ نظام المتصفح بدلاً من التقويم المخصص
+        const input = document.createElement("input");
+        input.type = "date";
+        input.value = value || "";
+        input.style.width = "100%";
+        input.style.border = "1px solid #ddd";
+        input.style.borderRadius = "4px";
+        input.style.padding = "4px";
+        input.style.boxSizing = "border-box";
+        input.style.textAlign = "center";
+        input.style.background = "transparent";
+        input.style.cursor = "pointer";
+        input.onchange = function() {
+          debouncedSaveTable();
+        };
+        td.innerHTML = "";
+        td.appendChild(input);
+        td.classList.add('date-cell');
+      };
+      
+    case 'dropdown':
+      return (td, value, colKey) => {
+        td.classList.add('dropdown-cell');
+        
+        // إضافة عنصر لعرض القيمة المختارة
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'selected-value';
+        
+        // إذا كانت القيمة فارغة، نعرض الخلية فارغة مع سهم فقط
+        if (!value || value.trim() === "") {
+          td.classList.add('empty');
+          valueSpan.textContent = "";
+        } else {
+          valueSpan.textContent = value;
+        }
+        
+        td.innerHTML = '';
+        td.appendChild(valueSpan);
+        
+        td.onclick = function(e) {
+          // منع فتح القائمة إذا تم النقر على السهم مباشرة
+          if (e.target === valueSpan || e.target === td) {
+            openDropdown(this, options, value);
+          }
+        };
+      };
+      
+    case 'phone':
+      return (td, value, colKey) => {
+        td.contentEditable = true;
+        td.textContent = value || "";
+        td.setAttribute('inputmode', 'tel');
+        td.classList.add('phone-cell');
+        td.style.direction = "ltr";
+        td.style.textAlign = "left";
+        td.style.unicodeBidi = "plaintext";
+
+        td.oninput = function() {
+          debouncedSaveTable();
+        };
+
+        td.onblur = function() {
+          const cleanedText = this.textContent.replace(/[^\d+\s\-()]/g, '');
+          if (this.textContent !== cleanedText) this.textContent = cleanedText;
+          debouncedSaveTable();
+        };
+
+        td.onfocus = function() {
+          setTimeout(() => {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(this);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }, 0);
+        };
+      };
+      
+    case 'number':
+      return (td, value, colKey) => {
+        td.contentEditable = true;
+        td.textContent = value;
+        td.setAttribute('inputmode', 'decimal');
+        td.classList.add('number-cell');
+        td.style.direction = "ltr";
+        td.style.textAlign = "left";
+
+        td.oninput = function() {
+          // فقط نمنع الحروف غير الرقمية بدون إعادة تعيين textContent
+          const sel = window.getSelection();
+          const range = sel.getRangeAt(0);
+          const offset = range.startOffset;
+          const text = this.textContent;
+          const cleaned = text.replace(/[^\d.]/g, '');
+          if (text !== cleaned) {
+            this.textContent = cleaned;
+            const newRange = document.createRange();
+            const node = this.firstChild || this;
+            newRange.setStart(node, Math.min(offset - 1, cleaned.length));
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          }
+          debouncedSaveTable();
+        };
+
+        td.onblur = function() {
+          const cleanedText = this.textContent.replace(/[^\d.]/g, '');
+          if (this.textContent !== cleanedText) this.textContent = cleanedText;
+          debouncedSaveTable();
+        };
+
+        td.onfocus = function() {
+          setTimeout(() => {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(this);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }, 0);
+        };
+      };
+      
+    case 'price':
+      return (td, value, colKey) => {
+        td.contentEditable = true;
+        td.setAttribute('inputmode', 'decimal');
+        td.classList.add('price-cell');
+        td.style.direction = "ltr";
+        td.style.textAlign = "left";
+
+        const symbol = currencySymbols[currency] || '$';
+        if (value) {
+          td.textContent = symbol + ' ' + value;
+        } else {
+          td.textContent = symbol + ' ';
+        }
+
+        td.oninput = function() {
+          // فقط نحفظ، لا نتدخل في textContent أثناء الكتابة
+          debouncedSaveTable();
+        };
+
+        td.onblur = function() {
+          const rawText = this.textContent.replace(symbol, '').trim();
+          const cleanedText = rawText.replace(/[^\d.]/g, '');
+          this.textContent = symbol + ' ' + cleanedText;
+          debouncedSaveTable();
+        };
+
+        td.onfocus = function() {
+          const currentValue = this.textContent.replace(symbol, '').trim();
+          this.textContent = currentValue;
+          setTimeout(() => {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(this);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }, 0);
+        };
+      };
+      
+    default: // text أو أي نوع آخر
+      return (td, value, colKey) => {
+        td.contentEditable = true;
+        td.textContent = value;
+
+        td.oninput = function() {
+          debouncedSaveTable();
+        };
+      };
+  }
+}
+
+// ====================== Data Management ======================
+async function loadAllData() {
+  try {
+    console.log('🔄 جارٍ تحميل البيانات...');
+    
+    const indexedDBData = await dbManager.loadData('projects');
+    
+    if (indexedDBData && Object.keys(indexedDBData).length > 0) {
+      console.log('✅ تم التحميل من IndexedDB');
+      projects = indexedDBData;
+    } else {
+      const backupData = localStorage.getItem('projects_backup');
+      if (backupData && backupData !== '{}') {
+        try {
+          const parsed = JSON.parse(backupData);
+          if (parsed && Object.keys(parsed).length > 0) {
+            console.log('✅ تم التحميل من النسخة الاحتياطية');
+            projects = parsed;
+            await dbManager.saveData('projects', projects);
+          }
+        } catch (e) {
+          console.warn('⚠️ خطأ في تحليل النسخة الاحتياطية:', e);
+        }
+      }
+      
+      if (!projects || Object.keys(projects).length === 0) {
+        const oldData = localStorage.getItem('projects');
+        if (oldData && oldData !== '{}') {
+          try {
+            const parsed = JSON.parse(oldData);
+            if (parsed && Object.keys(parsed).length > 0) {
+              console.log('✅ تم التحميل من localStorage القديم');
+              projects = parsed;
+              await dbManager.saveData('projects', projects);
+              localStorage.setItem('projects_backup', oldData);
+            }
+          } catch (e) {
+            console.warn('⚠️ خطأ في تحليل البيانات القديمة:', e);
+          }
+        }
+      }
+    }
+    
+    // تنظيف جميع البيانات عند التحميل
+    cleanAllProjectsData();
+    
+    // إضافة orderIndex للصفوف القديمة التي لا تحتوي عليه
+    addOrderIndexToOldRows();
+    
+    // إضافة النوع للعواميد القديمة (نص افتراضي)
+    addTypeToOldColumns();
+    
+    try {
+      const settings = JSON.parse(localStorage.getItem('app_settings') || '{}');
+      darkMode = settings.darkMode || localStorage.getItem('darkMode') === 'true';
+      
+      // تحميل اللغة المحفوظة
+      const savedLang = localStorage.getItem('appLanguage') || 'ar';
+      currentLang = savedLang;
+      
+      if (settings.currentProject && projects[settings.currentProject]) {
+        currentProject = settings.currentProject;
+      } else if (Object.keys(projects).length > 0) {
+        currentProject = Object.keys(projects)[0];
+      } else {
+        currentProject = null;
+      }
+    } catch (e) {
+      console.warn('⚠️ خطأ في تحميل الإعدادات:', e);
+      darkMode = localStorage.getItem('darkMode') === 'true';
+      currentProject = Object.keys(projects)[0] || null;
+    }
+    
+    // بناء واصفات الأعمدة للمشروع الحالي
+    if (currentProject) {
+      normalizeProject();
+    }
+    
+    applyDarkMode();
+    applyLanguage(currentLang);
+    
+    console.log('✅ اكتمل تحميل البيانات:', {
+      projectsCount: Object.keys(projects).length,
+      currentProject: currentProject,
+      darkMode: darkMode,
+      language: currentLang
+    });
+    
+  } catch (error) {
+    console.error('❌ خطأ في التحميل:', error);
+    try {
+      const oldData = localStorage.getItem('projects');
+      projects = oldData ? JSON.parse(oldData) : {};
+      currentProject = Object.keys(projects)[0] || null;
+      darkMode = localStorage.getItem('darkMode') === 'true';
+      applyDarkMode();
+      applyLanguage(currentLang);
+    } catch (fallbackError) {
+      console.error('❌ فشل Fallback أيضًا:', fallbackError);
+      projects = {};
+      currentProject = null;
+    }
+  }
+}
+
+// تنظيف جميع البيانات في جميع المشاريع
+function cleanAllProjectsData() {
+  for (const projectName in projects) {
+    const project = projects[projectName];
+    if (!project || !project.rows || !project.columns) continue;
+    
+    // إذا كان المشروع على الصيغة القديمة (مصفوفة فقط)، تخطيه
+    if (Array.isArray(project)) continue;
+    
+    project.rows.forEach(row => {
+      project.columns.forEach(col => {
+        if (col.key !== 'done' && row[col.key]) {
+          row[col.key] = cleanText(row[col.key]);
+        }
+      });
+    });
+  }
+}
+
+// إضافة orderIndex للصفوف القديمة التي لا تحتوي عليه
+function addOrderIndexToOldRows() {
+  for (const projectName in projects) {
+    const project = projects[projectName];
+    if (!project || !project.rows || Array.isArray(project)) continue;
+
+    // إعادة ترقيم كامل لضمان عدم وجود تعارض
+    let hasAnyMissing = project.rows.some(row => row.orderIndex === undefined || row.orderIndex === null);
+    if (hasAnyMissing) {
+      project.rows.forEach((row, index) => {
+        row.orderIndex = index;
+      });
+    }
+  }
+}
+
+// إضافة النوع للعواميد القديمة
+function addTypeToOldColumns() {
+  for (const projectName in projects) {
+    const project = projects[projectName];
+    if (!project || !project.columns || Array.isArray(project)) continue;
+    
+    project.columns.forEach(col => {
+      if (!col.type) {
+        // التخمين بناءً على اسم العمود أو المفتاح
+        if (col.key.includes('phone') || col.key.includes('whatsapp') || col.label.includes('هاتف') || col.label.includes('واتساب')) {
+          col.type = 'phone';
+        } else if (col.key.includes('date') || col.label.includes('تاريخ')) {
+          col.type = 'date';
+        } else if (col.key === 'done') {
+          col.type = 'checkbox';
+        } else if (col.key.includes('price') || col.key.includes('سعر') || col.key.includes('مبلغ')) {
+          col.type = 'price';
+          col.currency = col.currency || 'USD';
+        } else {
+          col.type = 'text'; // النوع الافتراضي
+        }
+      }
+      
+      // إضافة options للقوائم القديمة إذا كانت مفقودة
+      if (col.type === 'dropdown' && !col.options) {
+        col.options = [];
+      }
+      
+      // إضافة currency للأسعار القديمة إذا كانت مفقودة
+      if (col.type === 'price' && !col.currency) {
+        col.currency = 'USD';
+      }
+    });
+  }
+}
+
+async function saveAll() {
+  try {
+    const dataToSave = JSON.parse(JSON.stringify(projects));
+    
+    const dbSaved = await dbManager.saveData('projects', dataToSave);
+    
+    try {
+      localStorage.setItem('projects_backup', JSON.stringify(dataToSave));
+      console.log('💾 تم حفظ النسخة الاحتياطية في localStorage');
+    } catch (localStorageError) {
+      console.warn('⚠️ فشل حفظ النسخة الاحتياطية:', localStorageError);
+    }
+    
+    try {
+      const settings = {
+        darkMode: darkMode,
+        currentProject: currentProject,
+        lastSave: Date.now(),
+        storageType: dbSaved ? 'indexeddb' : 'localstorage',
+        language: currentLang
+      };
+      localStorage.setItem('app_settings', JSON.stringify(settings));
+      localStorage.setItem('darkMode', darkMode);
+    } catch (settingsError) {
+      console.warn('⚠️ فشل حفظ الإعدادات:', settingsError);
+    }
+    
+    try {
+      const dataSize = JSON.stringify(dataToSave).length;
+      if (dataSize < 4500000) {
+        localStorage.setItem('projects', JSON.stringify(dataToSave));
+      } else {
+        console.log('📊 البيانات كبيرة جدًا لـ localStorage، تم حفظها في IndexedDB فقط');
+      }
+    } catch (oldStorageError) {
+      console.warn('⚠️ فشل الحفظ القديم:', oldStorageError);
+    }
+    
+    console.log('✅ تم الحفظ بنجاح:', {
+      storage: dbSaved ? 'IndexedDB' : 'localStorage',
+      projects: Object.keys(projects).length,
+      language: currentLang
+    });
+
+    _hasUnsavedChanges = false;
+    showToast('💾 تم الحفظ', 'success', 1500);
+    
+  } catch (error) {
+    console.error('❌ خطأ في الحفظ:', error);
+    try {
+      localStorage.setItem('projects', JSON.stringify(projects));
+      console.log('🔄 تم الحفظ في localStorage كـ Fallback');
+    } catch (fallbackError) {
+      console.error('❌ فشل Fallback في الحفظ:', fallbackError);
+    }
+  }
+}
+
+async function migrateOldData() {
+  try {
+    const oldData = localStorage.getItem('projects');
+    if (oldData && oldData !== '{}' && oldData !== 'null') {
+      console.log('🔄 جارٍ ترحيل البيانات القديمة...');
+      
+      const parsedData = JSON.parse(oldData);
+      if (parsedData && Object.keys(parsedData).length > 0) {
+        const saved = await dbManager.saveData('projects', parsedData);
+        
+        if (saved) {
+          localStorage.setItem('projects_backup', oldData);
+          localStorage.setItem('data_migrated', 'true');
+          console.log('✅ تم ترحيل البيانات بنجاح إلى IndexedDB');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ فشل ترحيل البيانات:', error);
+  }
+}
+
+function checkStorageStatus() {
+  const status = {
+    indexedDB: dbManager.useIndexedDB,
+    indexedDBInitialized: dbManager.initialized,
+    localStorage: !!window.localStorage,
+    backupExists: !!localStorage.getItem('projects_backup'),
+    oldDataExists: !!localStorage.getItem('projects') && localStorage.getItem('projects') !== '{}',
+    settings: JSON.parse(localStorage.getItem('app_settings') || '{}'),
+    projectsCount: Object.keys(projects).length,
+    currentProject: currentProject,
+    language: currentLang
+  };
+  
+  return status;
+}
+
+function showStorageInfo() {
+  const status = checkStorageStatus();
+  
+  let message = `📊 **معلومات التخزين:**\n\n`;
+  message += `✅ **IndexedDB:** ${status.indexedDB ? 'مفعل' : 'غير مفعل'}\n`;
+  message += `📁 **النسخ الاحتياطي:** ${status.backupExists ? 'موجود' : 'غير موجود'}\n`;
+  message += `🔄 **البيانات القديمة:** ${status.oldDataExists ? 'موجودة' : 'غير موجودة'}\n`;
+  message += `📈 **عدد المشاريع:** ${status.projectsCount}\n`;
+  message += `🎯 **المشروع الحالي:** ${status.currentProject || 'لا يوجد'}\n`;
+  message += `💾 **نوع التخزين:** ${status.settings.storageType || 'غير محدد'}\n`;
+  message += `🌐 **اللغة:** ${status.language}\n`;
+  message += `\n✨ **الحالة:** ${status.indexedDB ? 'يعمل بنظام IndexedDB المتقدم' : 'يعمل بنظام localStorage التقليدي'}`;
+  
+  alert(message);
+}
+
+// ====================== Project Management ======================
+function normalizeProject(){ 
+  if(!currentProject) return; 
+  const p = projects[currentProject]; 
+  if(Array.isArray(p)){ 
+    projects[currentProject] = {
+      columns: getDefaultColumns(),
+      rows:p.map((row, index) => ({...row, rowId: row.rowId || generateRowId(), orderIndex: index}))
+    }; 
+    // بناء واصفات الأعمدة للمشروع المحوّل
+    buildColumnDescriptors(currentProject);
+  } else { 
+    p.columns.forEach(c => {
+      c.system = false;
+      if (!c.type) {
+        // تحديد النوع بناءً على الاسم أو المفتاح
+        if (c.key.includes('phone') || c.key.includes('whatsapp') || c.label.includes('هاتف') || c.label.includes('واتساب')) {
+          c.type = 'phone';
+        } else if (c.key.includes('date') || c.label.includes('تاريخ')) {
+          c.type = 'date';
+        } else if (c.key === 'done') {
+          c.type = 'checkbox';
+        } else if (c.key.includes('price') || c.key.includes('سعر') || c.key.includes('مبلغ')) {
+          c.type = 'price';
+          c.currency = c.currency || 'USD';
+        } else {
+          c.type = 'text';
+        }
+      }
+    });
+    p.rows.forEach((row, index) => {
+      if (!row.rowId) row.rowId = generateRowId();
+      if (row.orderIndex === undefined) row.orderIndex = index;
+    });
+    
+    // بناء أو إعادة بناء واصفات الأعمدة
+    buildColumnDescriptors(currentProject);
+  } 
+}
+
+function newProject(){ 
+  const name = prompt(texts[currentLang].promptNewProject); 
+  if(!name) return; 
+  projects[name] = {
+    columns: getDefaultColumns(),
+    rows:[]
+  }; 
+  currentProject = name; 
+  buildColumnDescriptors(currentProject);
+  saveAll(); 
+  renderTable(); 
+  updateAdminProjectList();
+}
+
+function renameProject(){ 
+  if(!currentProject) return; 
+  const newName = prompt(texts[currentLang].promptRenameProject, currentProject); 
+  if(!newName) return; 
+  projects[newName] = projects[currentProject]; 
+  delete projects[currentProject]; 
+  // نقل واصفات الأعمدة إلى الاسم الجديد
+  columnDescriptors[newName] = columnDescriptors[currentProject];
+  delete columnDescriptors[currentProject];
+  currentProject = newName; 
+  saveAll(); 
+  renderTable(); 
+  updateAdminProjectList();
+}
+
+function deleteProject(){ 
+  if(!currentProject) return; 
+  if(confirm("هل أنت متأكد من حذف المشروع الحالي؟")){ 
+    pushUndoState('حذف مشروع: ' + currentProject);
+    delete projects[currentProject]; 
+    delete columnDescriptors[currentProject]; // حذف واصفات الأعمدة
+    currentProject = Object.keys(projects)[0] || null; 
+    saveAll(); 
+    renderTable(); 
+    updateAdminProjectList(); 
+  } 
+}
+
+function switchProjectAdmin(){ 
+  currentProject = document.getElementById('projectSelectAdmin').value; 
+  renderTable(); 
+  saveAll(); 
+}
+
+function updateAdminProjectList(){ 
+  const select = document.getElementById('projectSelectAdmin'); 
+  select.innerHTML=""; 
+  Object.keys(projects).forEach(p=>{ 
+    const opt=document.createElement('option'); 
+    opt.value=p; 
+    opt.textContent=p; 
+    if(p===currentProject) opt.selected=true; 
+    select.appendChild(opt); 
+  }); 
+}
+
+// ====================== Row & Column Management ======================
+function addRow(){ 
+  normalizeProject();
+  pushUndoState('إضافة صف');
+  const row = {
+    rowId: generateRowId(),
+    orderIndex: projects[currentProject].rows.length
+  }; 
+  
+  projects[currentProject].columns.forEach(c => {
+    if (c.type === 'checkbox') {
+      row[c.key] = false;
+    } else if (c.type === 'dropdown') {
+      // ترك الخيار فارغًا كقيمة افتراضية (بدلاً من الخيار الأول)
+      row[c.key] = '';
+    } else {
+      row[c.key] = '';
+    }
+  }); 
+  
+  projects[currentProject].rows.push(row); 
+  saveAll(); 
+  renderTable(); 
+}
+
+function addColumn(){ 
+  // عرض نافذة إضافة العمود بدلاً من prompt
+  document.getElementById('addColumnModal').style.display = 'flex';
+  document.getElementById('newColumnName').value = '';
+  document.getElementById('columnType').value = 'text';
+  document.getElementById('dropdownOptions').value = '';
+  document.getElementById('dropdownOptionsContainer').style.display = 'none';
+  document.getElementById('priceOptionsContainer').style.display = 'none';
+}
+
+function toggleColumnOptions() {
+  const type = document.getElementById('columnType').value;
+  const dropdownContainer = document.getElementById('dropdownOptionsContainer');
+  const priceContainer = document.getElementById('priceOptionsContainer');
+  
+  dropdownContainer.style.display = type === 'dropdown' ? 'block' : 'none';
+  priceContainer.style.display = type === 'price' ? 'block' : 'none';
+}
+
+function saveNewColumn() {
+  const name = document.getElementById('newColumnName').value.trim();
+  if (!name) {
+    alert('يرجى إدخال اسم العمود');
+    return;
+  }
+  
+  const type = document.getElementById('columnType').value;
+  const key = "col_" + Date.now();
+  const column = {
+    key,
+    label: name,
+    type: type,
+    system: false
+  };
+  
+  if (type === 'dropdown') {
+    const optionsText = document.getElementById('dropdownOptions').value;
+    column.options = optionsText.split('\n')
+      .map(opt => opt.trim())
+      .filter(opt => opt.length > 0);
+    
+    if (column.options.length === 0) {
+      column.options = ['خيار 1', 'خيار 2', 'خيار 3'];
+    }
+  }
+  
+  if (type === 'price') {
+    const currency = document.getElementById('priceCurrency').value;
+    column.currency = currency;
+  }
+  
+  normalizeProject();
+  projects[currentProject].columns.push(column);
+  
+  // إضافة القيمة الافتراضية للصفوف الحالية - فارغة للقوائم المنسدلة
+  projects[currentProject].rows.forEach(row => {
+    if (type === 'checkbox') {
+      row[key] = false;
+    } else {
+      // تركها فارغة حتى يقوم المستخدم بالاختيار
+      row[key] = '';
+    }
+  });
+  
+  // إعادة بناء واصفات الأعمدة
+  buildColumnDescriptors(currentProject);
+  
+  saveAll();
+  renderTable();
+  closeAddColumnModal();
+}
+
+function closeAddColumnModal() {
+  document.getElementById('addColumnModal').style.display = 'none';
+}
+
+function editColumnSettings() {
+  if (!currentProject) return;
+  
+  const select = document.getElementById('editColumnSelect');
+  select.innerHTML = '';
+  
+  projects[currentProject].columns.forEach((col, index) => {
+    if (col.system) return; // تخطي الأعمدة النظامية
+    
+    const option = document.createElement('option');
+    option.value = index;
+    option.textContent = `${col.label} (${getTypeLabel(col.type)})`;
+    select.appendChild(option);
+  });
+  
+  if (select.options.length === 0) {
+    alert('لا توجد أعمدة قابلة للتعديل');
+    return;
+  }
+  
+  document.getElementById('editColumnModal').style.display = 'flex';
+  loadColumnSettings();
+}
+
+function getTypeLabel(type) {
+  switch(type) {
+    case 'text': return 'نص';
+    case 'phone': return 'هاتف';
+    case 'date': return 'تاريخ';
+    case 'dropdown': return 'قائمة';
+    case 'number': return 'رقم';
+    case 'price': return 'سعر';
+    case 'checkbox': return 'تم';
+    default: return 'نص';
+  }
+}
+
+function loadColumnSettings() {
+  const select = document.getElementById('editColumnSelect');
+  const index = parseInt(select.value);
+  if (isNaN(index)) return;
+  
+  const column = projects[currentProject].columns[index];
+  const container = document.getElementById('columnSettingsContainer');
+  
+  let html = `
+    <label>اسم العمود:</label>
+    <input type="text" id="editColumnName" value="${column.label}" style="width:100%; padding:8px; box-sizing:border-box;">
+    
+    <label>نوع العمود:</label>
+    <select id="editColumnType" style="width:100%; padding:8px; box-sizing:border-box;" onchange="toggleEditColumnOptions()">
+      <option value="text" ${column.type === 'text' ? 'selected' : ''}>نص عادي</option>
+      <option value="phone" ${column.type === 'phone' ? 'selected' : ''}>رقم هاتف</option>
+      <option value="date" ${column.type === 'date' ? 'selected' : ''}>تاريخ</option>
+      <option value="dropdown" ${column.type === 'dropdown' ? 'selected' : ''}>قائمة منسدلة</option>
+      <option value="number" ${column.type === 'number' ? 'selected' : ''}>رقم</option>
+      <option value="price" ${column.type === 'price' ? 'selected' : ''}>سعر</option>
+    </select>
+  `;
+  
+  if (column.type === 'dropdown') {
+    html += `
+      <div id="editDropdownOptionsContainer" style="display:block;">
+        <label>خيارات القائمة (سطر لكل خيار):</label>
+        <textarea id="editDropdownOptions" rows="4" style="width:100%; padding:8px; box-sizing:border-box;">${column.options ? column.options.join('\n') : ''}</textarea>
+      </div>
+      <div id="editPriceOptionsContainer" style="display:none;"></div>
+    `;
+  } else if (column.type === 'price') {
+    const currencies = {
+      USD: "دولار أمريكي ($)",
+      EUR: "يورو (€)",
+      GBP: "جنيه إسترليني (£)",
+      JPY: "ين ياباني (¥)",
+      SAR: "ريال سعودي (ر.س)",
+      AED: "درهم إماراتي (د.إ)",
+      EGP: "جنيه مصري (ج.م)",
+      QAR: "ريال قطري (ر.ق)",
+      KWD: "دينار كويتي (د.ك)",
+      BHD: "دينار بحريني (ب.د)",
+      OMR: "ريال عماني (ر.ع)",
+      JOD: "دينار أردني (د.أ)",
+      LBP: "ليرة لبنانية (ل.ل)",
+      TRY: "ليرة تركية (₺)",
+      CNY: "يوان صيني (¥)",
+      INR: "روبية هندية (₹)",
+      RUB: "روبل روسي (₽)"
+    };
+    
+    let currencyOptions = '';
+    for (const [code, name] of Object.entries(currencies)) {
+      currencyOptions += `<option value="${code}" ${column.currency === code ? 'selected' : ''}>${name}</option>`;
+    }
+    
+    html += `
+      <div id="editDropdownOptionsContainer" style="display:none;"></div>
+      <div id="editPriceOptionsContainer" style="display:block;">
+        <label>اختر العملة:</label>
+        <select id="editPriceCurrency" style="width:100%; padding:8px; box-sizing:border-box;">
+          ${currencyOptions}
+        </select>
+      </div>
+    `;
+  } else {
+    html += `
+      <div id="editDropdownOptionsContainer" style="display:none;"></div>
+      <div id="editPriceOptionsContainer" style="display:none;"></div>
+    `;
+  }
+  
+  container.innerHTML = html;
+}
+
+function toggleEditColumnOptions() {
+  const type = document.getElementById('editColumnType').value;
+  const dropdownContainer = document.getElementById('editDropdownOptionsContainer');
+  const priceContainer = document.getElementById('editPriceOptionsContainer');
+  
+  if (type === 'dropdown') {
+    if (!dropdownContainer.querySelector('textarea')) {
+      const html = `
+        <label>خيارات القائمة (سطر لكل خيار):</label>
+        <textarea id="editDropdownOptions" rows="4" style="width:100%; padding:8px; box-sizing:border-box;"></textarea>
+      `;
+      dropdownContainer.innerHTML = html;
+    }
+    dropdownContainer.style.display = 'block';
+    priceContainer.style.display = 'none';
+  } else if (type === 'price') {
+    if (!priceContainer.querySelector('select')) {
+      const currencies = {
+        USD: "دولار أمريكي ($)",
+        EUR: "يورو (€)",
+        GBP: "جنيه إسترليني (£)",
+        JPY: "ين ياباني (¥)",
+        SAR: "ريال سعودي (ر.س)",
+        AED: "درهم إماراتي (د.إ)",
+        EGP: "جنيه مصري (ج.م)",
+        QAR: "ريال قطري (ر.ق)",
+        KWD: "دينار كويتي (د.ك)",
+        BHD: "دينار بحريني (ب.د)",
+        OMR: "ريال عماني (ر.ع)",
+        JOD: "دينار أردني (د.أ)",
+        LBP: "ليرة لبنانية (ل.ل)",
+        TRY: "ليرة تركية (₺)",
+        CNY: "يوان صيني (¥)",
+        INR: "روبية هندية (₹)",
+        RUB: "روبل روسي (₽)"
+      };
+      
+      let currencyOptions = '';
+      for (const [code, name] of Object.entries(currencies)) {
+        currencyOptions += `<option value="${code}">${name}</option>`;
+      }
+      
+      const html = `
+        <label>اختر العملة:</label>
+        <select id="editPriceCurrency" style="width:100%; padding:8px; box-sizing:border-box;">
+          ${currencyOptions}
+        </select>
+      `;
+      priceContainer.innerHTML = html;
+    }
+    dropdownContainer.style.display = 'none';
+    priceContainer.style.display = 'block';
+  } else {
+    dropdownContainer.style.display = 'none';
+    priceContainer.style.display = 'none';
+  }
+}
+
+function saveColumnSettings() {
+  const select = document.getElementById('editColumnSelect');
+  const index = parseInt(select.value);
+  if (isNaN(index)) return;
+  
+  const column = projects[currentProject].columns[index];
+  const newName = document.getElementById('editColumnName').value.trim();
+  
+  if (!newName) {
+    alert('يرجى إدخال اسم العمود');
+    return;
+  }
+  
+  const oldType = column.type;
+  const newType = document.getElementById('editColumnType').value;
+  
+  // حفظ التغييرات
+  column.label = newName;
+  column.type = newType;
+  
+  if (newType === 'dropdown') {
+    const optionsText = document.getElementById('editDropdownOptions').value;
+    column.options = optionsText.split('\n')
+      .map(opt => opt.trim())
+      .filter(opt => opt.length > 0);
+    
+    if (column.options.length === 0) {
+      column.options = ['خيار 1', 'خيار 2', 'خيار 3'];
+    }
+    
+    // إذا تغير النوع إلى dropdown، نترك القيم فارغة
+    if (oldType !== 'dropdown') {
+      projects[currentProject].rows.forEach(row => {
+        row[column.key] = '';
+      });
+    }
+    delete column.currency;
+  } else if (newType === 'price') {
+    const currency = document.getElementById('editPriceCurrency').value;
+    column.currency = currency;
+    delete column.options;
+    
+    // إذا تغير النوع إلى price، نترك القيم فارغة
+    if (oldType !== 'price') {
+      projects[currentProject].rows.forEach(row => {
+        row[column.key] = '';
+      });
+    }
+  } else {
+    delete column.options;
+    delete column.currency;
+    
+    // إذا كان نوع قديم dropdown أو price وتغير إلى نوع آخر
+    if ((oldType === 'dropdown' || oldType === 'price') && newType !== oldType) {
+      projects[currentProject].rows.forEach(row => {
+        row[column.key] = '';
+      });
+    }
+  }
+  
+  // إعادة بناء واصفات الأعمدة
+  buildColumnDescriptors(currentProject);
+  
+  saveAll();
+  renderTable();
+  closeEditColumnModal();
+}
+
+function closeEditColumnModal() {
+  document.getElementById('editColumnModal').style.display = 'none';
+}
+
+function renameColumn(){ 
+  normalizeProject(); 
+  const cols = projects[currentProject].columns; 
+  const list = cols.map((c,i) => `${i+1} - ${c.label}`).join("\n"); 
+  const index = prompt(texts[currentLang].promptSelectColumn + list); 
+  if(!index) return; 
+  const col = cols[index-1]; 
+  if(!col) return; 
+  const newLabel = prompt(texts[currentLang].promptRenameColumn, col.label); 
+  if(!newLabel) return; 
+  col.label = newLabel; 
+  
+  // تحديث واصفات الأعمدة
+  buildColumnDescriptors(currentProject);
+  
+  saveAll(); 
+  renderTable(); 
+}
+
+function deleteColumn(){ 
+  normalizeProject(); 
+  const cols = projects[currentProject].columns; 
+  const list = cols.map((c,i) => `${i+1} - ${c.label}`).join("\n"); 
+  const index = prompt(texts[currentLang].promptSelectColumn + list); 
+  if(!index) return; 
+  const col = cols[index-1]; 
+  if(!col) return; 
+  if(col.system) {
+    alert(texts[currentLang].alertSystemColumn);
+    return;
+  }
+  if(!confirm(`${texts[currentLang].confirmDeleteColumn} "${col.label}"؟`)) return; 
+  pushUndoState('حذف عمود: ' + col.label);
+  cols.splice(index-1,1); 
+  projects[currentProject].rows.forEach(r => delete r[col.key]); 
+  
+  // إعادة بناء واصفات الأعمدة
+  buildColumnDescriptors(currentProject);
+  
+  saveAll(); 
+  renderTable(); 
+}
+
+// ====================== Table Rendering ======================
+const debouncedSaveTable = debounce(function() {
+  _hasUnsavedChanges = true;
+  const rows = []; 
+  document.querySelectorAll("tbody tr").forEach(tr => { 
+    const obj = {
+      rowId: tr.dataset.rowId,
+      orderIndex: parseInt(tr.dataset.orderIndex) || 0
+    }; 
+    
+    const tds = tr.querySelectorAll("td[data-key]"); 
+    tds.forEach(td => {
+      const key = td.dataset.key;
+      if (!key) return;
+
+      if (td.querySelector("input[type='checkbox']")) {
+        obj[key] = td.querySelector("input[type='checkbox']").checked;
+      } else if (td.querySelector("select")) {
+        obj[key] = td.querySelector("select").value;
+      } else if (td.querySelector("input[type='date']")) {
+        obj[key] = td.querySelector("input[type='date']").value;
+      } else if (td.querySelector("input[type='tel']")) {
+        obj[key] = td.querySelector("input[type='tel']").value;
+      } else if (td.querySelector("input[type='number']")) {
+        obj[key] = td.querySelector("input[type='number']").value;
+      } else {
+        // خاص بـ dropdown cells
+        if (td.classList.contains('dropdown-cell')) {
+          const valueSpan = td.querySelector('.selected-value');
+          obj[key] = valueSpan ? valueSpan.textContent : '';
+        } else if (td.classList.contains('price-cell')) {
+          // إزالة رمز العملة وحفظ القيمة فقط
+          const textValue = td.textContent || '';
+          const valueWithoutSymbol = textValue.replace(/[^\d.]/g, '');
+          obj[key] = valueWithoutSymbol;
+        } else {
+          const textValue = td.textContent || '';
+          obj[key] = cleanText(textValue);
+        }
+      }
+    });
+    rows.push(obj); 
+  }); 
+  
+  if (currentProject && projects[currentProject]) {
+    const rowMap = {};
+    rows.forEach(row => {
+      if (row.rowId) {
+        rowMap[row.rowId] = row;
+      }
+    });
+    
+    projects[currentProject].rows = projects[currentProject].rows.map(oldRow => {
+      return rowMap[oldRow.rowId] || oldRow;
+    }).filter(row => row.rowId && rowMap[row.rowId]);
+    
+    saveAll();
+  }
+}, 500);
+
+function sortRowsForDisplay(rows) {
+  const pinnedRows = rows.filter(row => row.pinned).sort((a, b) => a.orderIndex - b.orderIndex);
+  const unpinnedRows = rows.filter(row => !row.pinned).sort((a, b) => a.orderIndex - b.orderIndex);
+  return [...pinnedRows, ...unpinnedRows];
+}
+
+function renderTable(){ 
+  const emptyBox = document.getElementById("emptyStateContainer");
+
+  if (!currentProject) {
+    emptyBox.innerHTML = `
+      <button class="empty-state-btn" onclick="newProject()">
+        ${texts[currentLang].emptyStateBtn}
+      </button>
+    `;
+    document.getElementById("tableWrapper").style.display = "none";
+    return;
+  } else {
+    emptyBox.innerHTML = "";
+    document.getElementById("tableWrapper").style.display = "block";
+  }
+  
+  normalizeProject(); 
+  
+  // استخدام واصفات الأعمدة المحسنة
+  const descriptors = columnDescriptors[currentProject];
+  if (!descriptors) {
+    console.warn('⚠️ لم يتم العثور على واصفات الأعمدة، يتم بناءها الآن');
+    buildColumnDescriptors(currentProject);
+    return renderTable(); // إعادة المحاولة
+  }
+  
+  const table=document.getElementById("table"); 
+  const thead=table.querySelector("thead"); 
+  const tbody=table.querySelector("tbody"); 
+  thead.innerHTML=""; tbody.innerHTML=""; 
+
+  const trHead = document.createElement("tr"); 
+
+  const thIndex = document.createElement("th");
+  thIndex.textContent = "#";
+  trHead.appendChild(thIndex);
+
+  projects[currentProject].columns.forEach(col => {
+    const th = document.createElement("th");
+    th.textContent = col.label;
+    trHead.appendChild(th);
+  });
+
+  const thAction = document.createElement("th");
+  thAction.textContent = texts[currentLang].settingsHeader || 'الإعدادات';
+  trHead.appendChild(thAction);
+
+  thead.appendChild(trHead);
+  
+  const sortedRows = sortRowsForDisplay(projects[currentProject].rows);
+  
+  sortedRows.forEach((row, displayIndex) => {
+    const tr = document.createElement("tr");
+    tr.dataset.rowId = row.rowId;
+    tr.dataset.orderIndex = row.orderIndex;
+    
+    if(row.pinned){
+      tr.classList.add('pinned');
+    }
+
+    // تطبيق لون الصف إذا كان موجوداً
+    if (row.rowColor) {
+      tr.classList.add('row-colored');
+      tr.style.setProperty('--row-color', row.rowColor);
+    }
+
+    const tdIndex = document.createElement("td");
+    tdIndex.textContent = displayIndex + 1;
+    tr.appendChild(tdIndex);
+
+    projects[currentProject].columns.forEach(col => {
+      const desc = descriptors[col.key];
+      if (!desc) {
+        console.warn(`⚠️ لم يتم العثور على واصف للعمود: ${col.key}`);
+        return;
+      }
+      
+      const td = document.createElement("td");
+      td.dataset.key = desc.key;
+      
+      const value = row[desc.key] || "";
+      
+      // استخدام دالة التصيير الجاهزة من الواصفات
+      desc.renderer(td, value, desc.key);
+      
+      tr.appendChild(td);
+    });
+
+    const tdAction = document.createElement("td"); 
+    const settingsBtn = document.createElement("button"); 
+    settingsBtn.textContent = "⚙️"; 
+    settingsBtn.onclick = () => openRowSettingsModal(row.rowId); 
+    tdAction.appendChild(settingsBtn); 
+    tr.appendChild(tdAction);
+
+    tbody.appendChild(tr); 
+  });
+
+  updateStatsBar();
+}
+
+// ====================== Row Operations ======================
+function openRowSettingsModal(rowId) {
+  const modal = document.getElementById('rowSettingsModal');
+  const optionsDiv = document.getElementById('rowSettingsOptions');
+  const row = projects[currentProject] && projects[currentProject].rows.find(r => r.rowId === rowId);
+  const isPinned = row && row.pinned;
+
+  optionsDiv.innerHTML = `
+    <button onclick="deleteRowByRowId('${rowId}')">🗑️ حذف الصف</button>
+    <button onclick="togglePinRowByRowId('${rowId}')">${isPinned ? '📌 إلغاء التثبيت' : '📌 تثبيت الصف'}</button>
+    <button onclick="copyRowByRowId('${rowId}')">📋 نسخ الصف</button>
+    <button onclick="openRowColorModal('${rowId}')">🎨 تلوين الصف</button>
+  `;
+
+  modal.style.display = 'flex';
+}
+
+function closeRowSettingsModal() {
+  document.getElementById('rowSettingsModal').style.display = 'none';
+}
+
+function deleteRowByRowId(rowId) {
+  if(!currentProject) return;
+  const rows = projects[currentProject].rows;
+
+  if(confirm(texts[currentLang].confirmDeleteRow)) {
+    const index = rows.findIndex(row => row.rowId === rowId);
+    if (index !== -1) {
+      pushUndoState('حذف صف');
+      const removedOrderIndex = rows[index].orderIndex;
+      rows.splice(index, 1);
+
+      // تحديث orderIndex بناءً على القيمة الفعلية للـ orderIndex وليس الـ array index
+      rows.forEach(row => {
+        if (row.orderIndex > removedOrderIndex) {
+          row.orderIndex--;
+        }
+      });
+
+      saveAll();
+      renderTable();
+      closeRowSettingsModal();
+    }
+  }
+}
+
+function togglePinRowByRowId(rowId) {
+  if(!currentProject) return;
+  const rows = projects[currentProject].rows;
+  const index = rows.findIndex(row => row.rowId === rowId);
+
+  if (index === -1) return;
+
+  const row = rows[index];
+  row.pinned = !row.pinned;
+
+  if (!row.pinned) {
+    rows.sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      
+      return a.orderIndex - b.orderIndex;
+    });
+  }
+
+  saveAll();
+  renderTable();
+  closeRowSettingsModal();
+}
+
+// ====================== Dropdown Functions ======================
+function openDropdown(cell, options, currentValue) {
+  activeDropdownCell = cell;
+  
+  const dropdown = document.getElementById('dropdownSelect');
+  dropdown.innerHTML = '';
+  
+  options.forEach(option => {
+    const div = document.createElement('div');
+    div.className = 'dropdown-option';
+    div.textContent = option;
+    div.onclick = function() {
+      selectDropdownOption(option);
+    };
+    dropdown.appendChild(div);
+  });
+  
+  // وضع القائمة تحت الخلية
+  const rect = cell.getBoundingClientRect();
+  dropdown.style.position = 'fixed';
+  dropdown.style.top = (rect.bottom + 5) + 'px';
+  dropdown.style.left = rect.left + 'px';
+  dropdown.style.width = rect.width + 'px';
+  dropdown.style.display = 'block';
+  
+  // إغلاق القائمة عند النقر خارجها
+  setTimeout(() => {
+    document.addEventListener('click', closeDropdownOnClickOutside);
+  }, 100);
+}
+
+function selectDropdownOption(option) {
+  if (activeDropdownCell) {
+    const valueSpan = activeDropdownCell.querySelector('.selected-value');
+    if (valueSpan) {
+      valueSpan.textContent = option;
+    }
+    activeDropdownCell.classList.remove('empty');
+    debouncedSaveTable();
+  }
+  closeDropdown();
+}
+
+function closeDropdown() {
+  const dropdown = document.getElementById('dropdownSelect');
+  dropdown.style.display = 'none';
+  activeDropdownCell = null;
+  document.removeEventListener('click', closeDropdownOnClickOutside);
+}
+
+function closeDropdownOnClickOutside(event) {
+  const dropdown = document.getElementById('dropdownSelect');
+  if (!dropdown.contains(event.target) && event.target !== activeDropdownCell) {
+    closeDropdown();
+  }
+}
+
+// ====================== Table Search ======================
+function filterTable(){
+  const query = document.getElementById("tableSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("tbody tr");
+
+  rows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    tr.style.display = text.includes(query) ? "" : "none";
+  });
+}
+
+// ====================== Sorting Feature ======================
+function openSortModal() {
+  if (!currentProject) return;
+  
+  const select = document.getElementById('sortColumnSelect');
+  select.innerHTML = '';
+  
+  projects[currentProject].columns.forEach(col => {
+    const option = document.createElement('option');
+    option.value = col.key;
+    option.textContent = col.label;
+    select.appendChild(option);
+  });
+  
+  document.getElementById('sortModal').style.display = 'flex';
+}
+
+function closeSortModal() {
+  document.getElementById('sortModal').style.display = 'none';
+}
+
+function applySorting() {
+  const columnKey = document.getElementById('sortColumnSelect').value;
+  const sortOrder = document.getElementById('sortOrder').value;
+  
+  if (!columnKey || !currentProject) return;
+  
+  const column = projects[currentProject].columns.find(c => c.key === columnKey);
+  if (!column) return;
+  
+  const rows = projects[currentProject].rows;
+  
+  rows.sort((a, b) => {
+    let valueA = a[columnKey] || '';
+    let valueB = b[columnKey] || '';
+    
+    // التحويل إلى الأرقام إذا كان نوع العمود رقم أو سعر
+    if (column.type === 'number' || column.type === 'price') {
+      valueA = parseFloat(valueA) || 0;
+      valueB = parseFloat(valueB) || 0;
+      return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+    }
+    
+    // للتواريخ
+    if (column.type === 'date') {
+      valueA = new Date(valueA).getTime();
+      valueB = new Date(valueB).getTime();
+      // إذا كان التاريخ غير صالح، نجعله في النهاية
+      if (isNaN(valueA)) valueA = sortOrder === 'asc' ? Infinity : -Infinity;
+      if (isNaN(valueB)) valueB = sortOrder === 'asc' ? Infinity : -Infinity;
+      return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+    }
+    
+    // للنصوص والقوائم المنسدلة
+    valueA = String(valueA).toLowerCase();
+    valueB = String(valueB).toLowerCase();
+    
+    if (sortOrder === 'asc') {
+      return valueA.localeCompare(valueB, currentLang === 'ar' ? 'ar' : 'en');
+    } else {
+      return valueB.localeCompare(valueA, currentLang === 'ar' ? 'ar' : 'en');
+    }
+  });
+  
+  // تحديث orderIndex بناءً على الترتيب الجديد
+  rows.forEach((row, index) => {
+    row.orderIndex = index;
+  });
+  
+  saveAll();
+  renderTable();
+  closeSortModal();
+}
+
+// ====================== Export Functions ======================
+function csvEscape(val) {
+  if (val === null || val === undefined) return '""';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+function exportCSV(){
+  if(!currentProject) return;
+  const project = projects[currentProject];
+  const cols = project.columns.map(c => csvEscape(c.label));
+  const rows = project.rows.map(r =>
+    project.columns.map(c =>
+      c.type === 'checkbox' ? (r[c.key] ? '✔' : '✖') : csvEscape(cleanText(r[c.key] || ''))
+    ).join(',')
+  );
+  const csvContent = '\uFEFF' + cols.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (currentProject || 'data') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ تم تصدير CSV بنجاح', 'success');
+}
+
+function exportJSON(){
+  const data = JSON.stringify(projects, null, 2);
+  const blob = new Blob([data], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sheets_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ تم تصدير JSON بنجاح', 'success');
+}
+
+function exportPDF(){
+  if(!currentProject) return;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    // إضافة خط عربي عبر Unicode
+    doc.setFont('helvetica');
+    doc.setFontSize(14);
+    doc.text(currentProject, doc.internal.pageSize.width / 2, 15, { align: 'center' });
+
+    const project = projects[currentProject];
+    const head = [['#', ...project.columns.map(c => c.label), '']];
+    const body = sortRowsForDisplay(project.rows).map((row, i) => [
+      String(i + 1),
+      ...project.columns.map(c =>
+        c.type === 'checkbox' ? (row[c.key] ? '✔' : '✖') : String(row[c.key] || '')
+      ),
+      ''
+    ]);
+
+    doc.autoTable({
+      head,
+      body,
+      startY: 22,
+      styles: { font: 'helvetica', fontSize: 9, halign: 'center' },
+      headStyles: { fillColor: [76, 175, 80], textColor: 255 },
+      alternateRowStyles: { fillColor: [245, 255, 245] }
+    });
+
+    doc.save((currentProject || 'data') + '.pdf');
+    showToast('✅ تم تصدير PDF بنجاح', 'success');
+  } catch(e) {
+    console.error('PDF export error:', e);
+    showToast('❌ فشل تصدير PDF', 'error');
+  }
+}
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const type = input.dataset.type;
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      if (type === 'json') {
+        const parsed = JSON.parse(e.target.result);
+        if (typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('تنسيق JSON غير صحيح');
+        showCustomConfirm(
+          '⚠️ استيراد JSON',
+          'سيتم استبدال جميع بياناتك الحالية ببيانات الملف. هل أنت متأكد؟',
+          () => {
+            projects = parsed;
+            currentProject = Object.keys(projects)[0] || null;
+            if (currentProject) buildColumnDescriptors(currentProject);
+            saveAll();
+            renderTable();
+            updateAdminProjectList();
+            showToast('✅ تم استيراد البيانات بنجاح', 'success');
+          }
+        );
+      } else if (type === 'csv') {
+        importCSV(e.target.result);
+      }
+    } catch(err) {
+      showToast('❌ فشل الاستيراد: ' + err.message, 'error');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function importCSV(content) {
+  const lines = content.replace(/^\uFEFF/, '').split('\n').filter(l => l.trim());
+  if (lines.length < 2) { showToast('❌ الملف فارغ أو غير صحيح', 'error'); return; }
+
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = lines.slice(1).map((line, idx) => {
+    const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const row = { rowId: generateRowId(), orderIndex: idx };
+    headers.forEach((h, i) => { row['col_csv_' + i] = vals[i] || ''; });
+    return row;
+  });
+
+  const columns = headers.map((h, i) => ({
+    key: 'col_csv_' + i,
+    label: h,
+    type: 'text',
+    system: false
+  }));
+
+  showCustomPrompt(
+    '📊 استيراد CSV',
+    'اسم المشروع الجديد:',
+    'مشروع مستورد',
+    (name) => {
+      if (!name) return;
+      projects[name] = { columns, rows };
+      currentProject = name;
+      buildColumnDescriptors(currentProject);
+      saveAll();
+      renderTable();
+      updateAdminProjectList();
+      showToast('✅ تم استيراد CSV كمشروع جديد', 'success');
+    }
+  );
+}
+
+const appLink = "https://www.appcreator24.com/app3860985-mog806";
+
+function copyAppLink() {
+  navigator.clipboard.writeText(appLink);
+  showToast(texts[currentLang].shareCopied, 'success');
+}
+
+function shareWhatsApp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(appLink)}`);
+}
+
+function shareFacebook() {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appLink)}`);
+}
+
+function shareLinkedIn() {
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(appLink)}`);
+}
+
+function openShareModal() {
+  document.getElementById("shareModal").style.display = "flex";
+}
+
+function closeShareModal() {
+  document.getElementById("shareModal").style.display = "none";
+}
+
+// ====================== Admin Modal ======================
+function openAdminModal(){ 
+  document.getElementById('adminModal').style.display='flex'; 
+  updateAdminProjectList(); 
+}
+
+function closeAdminModal(){ 
+  document.getElementById('adminModal').style.display='none'; 
+}
+
+// ====================== Dark Mode ======================
+function applyDarkMode() {
+  if(darkMode) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+}
+
+function toggleDarkMode() {
+  darkMode = !darkMode;
+  saveAll();
+  applyDarkMode();
+}
+
+// ====================== Toast Notification ======================
+function showToast(message, type = 'info', duration = 2800) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { toast.classList.add('show'); });
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 350);
+  }, duration);
+}
+
+// ====================== Custom Dialog (replaces alert/confirm/prompt) ======================
+let _dialogResolve = null;
+
+function showCustomConfirm(title, message, onConfirm) {
+  document.getElementById('customDialogTitle').textContent = title;
+  document.getElementById('customDialogMessage').textContent = message;
+  document.getElementById('customDialogInput').style.display = 'none';
+  document.getElementById('customDialogConfirm').textContent = 'تأكيد';
+  document.getElementById('customDialogConfirm').onclick = () => {
+    closeCustomDialog(true);
+    if (onConfirm) onConfirm();
+  };
+  document.getElementById('customDialogModal').style.display = 'flex';
+}
+
+function showCustomPrompt(title, message, defaultVal, onConfirm) {
+  document.getElementById('customDialogTitle').textContent = title;
+  document.getElementById('customDialogMessage').textContent = message;
+  const input = document.getElementById('customDialogInput');
+  input.style.display = 'block';
+  input.value = defaultVal || '';
+  setTimeout(() => input.focus(), 100);
+  document.getElementById('customDialogConfirm').textContent = 'تأكيد';
+  document.getElementById('customDialogConfirm').onclick = () => {
+    const val = input.value.trim();
+    closeCustomDialog(true);
+    if (onConfirm) onConfirm(val);
+  };
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') document.getElementById('customDialogConfirm').click();
+    if (e.key === 'Escape') closeCustomDialog(false);
+  };
+  document.getElementById('customDialogModal').style.display = 'flex';
+}
+
+function closeCustomDialog(confirmed) {
+  document.getElementById('customDialogModal').style.display = 'none';
+  document.getElementById('customDialogInput').style.display = 'none';
+}
+
+// ====================== Undo / Redo ======================
+const undoStack = [];
+const MAX_UNDO = 20;
+
+function pushUndoState(description) {
+  const snapshot = {
+    description,
+    projects: JSON.parse(JSON.stringify(projects)),
+    currentProject
+  };
+  undoStack.push(snapshot);
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  document.getElementById('undoBtn').disabled = false;
+}
+
+function undoLastAction() {
+  if (undoStack.length === 0) return;
+  const snapshot = undoStack.pop();
+  projects = snapshot.projects;
+  currentProject = snapshot.currentProject;
+  if (currentProject) buildColumnDescriptors(currentProject);
+  saveAll();
+  renderTable();
+  updateAdminProjectList();
+  showToast('↩ تم التراجع: ' + snapshot.description, 'info');
+  if (undoStack.length === 0) document.getElementById('undoBtn').disabled = true;
+}
+
+// ====================== Row Color ======================
+const ROW_COLORS = [
+  '#ffcdd2','#f8bbd0','#e1bee7','#c5cae9',
+  '#bbdefb','#b2dfdb','#dcedc8','#fff9c4',
+  '#ffe0b2','#d7ccc8','#cfd8dc','#ffffff'
+];
+let _colorTargetRowId = null;
+let _selectedColor = null;
+
+function openRowColorModal(rowId) {
+  _colorTargetRowId = rowId;
+  const row = projects[currentProject].rows.find(r => r.rowId === rowId);
+  _selectedColor = row ? row.rowColor || null : null;
+
+  const container = document.getElementById('colorSwatches');
+  container.innerHTML = '';
+  ROW_COLORS.forEach(color => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch' + (color === _selectedColor ? ' selected' : '');
+    swatch.style.background = color;
+    swatch.onclick = () => {
+      _selectedColor = color;
+      container.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      swatch.classList.add('selected');
+    };
+    container.appendChild(swatch);
+  });
+
+  document.getElementById('rowColorModal').style.display = 'flex';
+  closeRowSettingsModal();
+}
+
+function applyRowColor() {
+  if (!_colorTargetRowId || !_selectedColor) return;
+  const row = projects[currentProject].rows.find(r => r.rowId === _colorTargetRowId);
+  if (row) {
+    pushUndoState('تغيير لون الصف');
+    row.rowColor = _selectedColor;
+    saveAll();
+    renderTable();
+  }
+  closeRowColorModal();
+}
+
+function removeRowColor() {
+  if (!_colorTargetRowId) return;
+  const row = projects[currentProject].rows.find(r => r.rowId === _colorTargetRowId);
+  if (row) {
+    pushUndoState('إزالة لون الصف');
+    delete row.rowColor;
+    saveAll();
+    renderTable();
+  }
+  closeRowColorModal();
+}
+
+function closeRowColorModal() {
+  document.getElementById('rowColorModal').style.display = 'none';
+  _colorTargetRowId = null;
+}
+
+// ====================== Copy Row ======================
+function copyRowByRowId(rowId) {
+  if(!currentProject) return;
+  const rows = projects[currentProject].rows;
+  const original = rows.find(r => r.rowId === rowId);
+  if (!original) return;
+
+  pushUndoState('نسخ صف');
+  const newRow = JSON.parse(JSON.stringify(original));
+  newRow.rowId = generateRowId();
+  newRow.orderIndex = rows.length;
+  newRow.pinned = false;
+  rows.push(newRow);
+  saveAll();
+  renderTable();
+  closeRowSettingsModal();
+  showToast('✅ تم نسخ الصف', 'success');
+}
+
+// ====================== Stats Bar ======================
+function updateStatsBar() {
+  const bar = document.getElementById('statsBar');
+  if (!currentProject || !projects[currentProject]) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+
+  const rows = projects[currentProject].rows;
+  const cols = projects[currentProject].columns;
+
+  const total = rows.length;
+  const pinned = rows.filter(r => r.pinned).length;
+
+  // عدد الـ checkboxes المفعلة
+  const checkboxCols = cols.filter(c => c.type === 'checkbox');
+  let done = 0;
+  if (checkboxCols.length > 0) {
+    rows.forEach(r => { if (r[checkboxCols[0].key]) done++; });
+  }
+
+  // مجموع أعمدة الأرقام أو الأسعار
+  const numCols = cols.filter(c => c.type === 'number' || c.type === 'price');
+  let sumText = '—';
+  if (numCols.length > 0) {
+    const col = numCols[0];
+    const sum = rows.reduce((acc, r) => acc + (parseFloat(r[col.key]) || 0), 0);
+    const symbol = col.type === 'price' ? (currencySymbols[col.currency] || '$') + ' ' : '';
+    sumText = symbol + sum.toLocaleString();
+  }
+
+  document.getElementById('statRows').textContent = total;
+  document.getElementById('statDone').textContent = checkboxCols.length > 0 ? done + '/' + total : '—';
+  document.getElementById('statPinned').textContent = pinned;
+  document.getElementById('statSum').textContent = sumText;
+}
+
+// ====================== Beforeunload Warning ======================
+let _hasUnsavedChanges = false;
+
+window.addEventListener('beforeunload', (e) => {
+  if (_hasUnsavedChanges) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ====================== Initialization ======================
+window.onload = async function() {
+  console.log('🚀 بدء تحميل التطبيق...');
+
+  await migrateOldData();
+
+  await loadAllData();
+  
+  renderTable();
+  
+  updateAdminProjectList();
+  
+  console.log('✨ التطبيق جاهز للاستخدام!');
+};
+
+(function loadDarkModeImmediately() {
+  try {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (savedDarkMode) {
+      document.body.classList.add('dark-mode');
+      darkMode = true;
+    }
+  } catch (e) {
+    console.warn('⚠️ فشل تحميل الوضع الداكن:', e);
+  }
+})();
+</script>
+</body>
+</html>
